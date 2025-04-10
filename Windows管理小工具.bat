@@ -3,7 +3,7 @@
 %1 mshta vbscript:CreateObject("Shell.Application").ShellExecute("cmd.exe","/c %~s0 ::","","runas",1)(window.close)&&exit cd /d "%~dp0"
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
-set "title=Windows管理小工具 v1.8"
+set "title=Windows管理小工具 v1.9"
 title %title%
 :: 主菜单 
 :main_menu 
@@ -14,14 +14,14 @@ call :print_separator
 echo   1. 右键菜单设置                  11. WIFI密码 
 echo   2. 桌面设置                      12. 电源管理 
 echo   3. 任务栏设置                    13. 预装应用管理
-echo   4. 资源管理器设置                 
-echo   5. 安装 Office 
+echo   4. 资源管理器设置                14. Telnet 
+echo   5. 安装 Office                   15. 图一乐 
 echo   6. 激活 Windows ^& Office 
 echo   7. 下载 Windows
 echo   8. Windows更新设置 
 echo   9. UAC（用户账户控制）设置 
 echo  10. 上帝模式 
-echo   0. 退出 
+echo   0. 退出(q) 
 call :print_separator
 echo. 
 set /p main_option=请输入你的选择: 
@@ -38,7 +38,10 @@ if "%main_option%"=="10" call :god_mod
 if "%main_option%"=="11" call :wifi_password
 if "%main_option%"=="12" call :power_setting
 if "%main_option%"=="13" call :pre_installed_app
+if "%main_option%"=="14" call :telnet_setting
+if "%main_option%"=="15" call :hahaha
 if "%main_option%"=="0"  goto byebye
+if /i "%main_option%"=="q" goto byebye
 goto main_menu 
 
 :: 右键菜单设置子菜单 
@@ -52,7 +55,7 @@ echo  3. 添加超级菜单
 echo  4. 删除超级菜单
 echo  5. 添加Hash右键菜单
 echo  6. 删除Hash右键菜单
-echo  0. 返回
+echo  0. 返回(q) 
 call :print_separator
 echo.
 set /p submenu_option=请输入你的选择: 
@@ -92,7 +95,9 @@ if "%submenu_option%"=="1" (
 	echo 正在删除Hash右键菜单...
 	reg delete "HKEY_CLASSES_ROOT\*\shell\GetFileHash" /f >nul 2>&1
 	echo Hash右键菜单已删除! & timeout /t 3
-) else if "%submenu_option%"=="0" exit /b
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto submenu_right_click
 
 :: 添加超级菜单，后面看看怎么使用reg文件进行处理
@@ -254,7 +259,7 @@ echo  6. 添加网络连接
 echo  7. 添加IE快捷方式
 echo  8. 显示windows版本水印 
 echo  9. 隐藏windows版本水印
-echo  0. 返回 
+echo  0. 返回(q) 
 call :print_separator
 echo.
 set /p submenu_option=请输入你的选择: 
@@ -300,7 +305,9 @@ if "%submenu_option%"=="1" (
 	REG ADD "HKCU\Control Panel\Desktop" /V PaintDesktopVersion /T REG_DWORD /D 0 /F >nul 2>&1
 	call :restart_explorer
 	echo 操作完成！& timeout /t 2
-)else if "%submenu_option%"=="0" exit /b
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto desktop
 
 :: 桌面添加网络连接
@@ -335,28 +342,25 @@ exit /b
 color 0A
 call :print_title "任务栏设置" 
 set "submenu_option=" 
-call :print_separator
-echo   1. 一键净化任务栏 
-echo   2. 禁用小组件 
-echo   3. 启用小组件 
-echo   4. 卸载小组件 
+call :print_separator "*" 70
+echo   1. 一键净化任务栏                     11. 自动隐藏任务栏 — 开启 
+echo   2. 禁用小组件                         12. 自动隐藏任务栏 — 关闭 
+echo   3. 启用小组件                         13. 时间显示秒 
+echo   4. 卸载小组件                         14. 时间隐藏秒（默认） 
 echo   5. 安装小组件 
 echo   6. 任务视图 — 隐藏 
 echo   7. 任务视图 — 显示 
 echo   8. 搜索 - 隐藏 
 echo   9. 搜索 - 仅显示搜索图标 
-echo  10. 清除任务栏固定项目（Edge、商店、资源管理器） 
-echo  11. 自动隐藏任务栏 — 开启 
-echo  12. 自动隐藏任务栏 — 关闭 
-echo   0. 返回 
-call :print_separator
+echo  10. 清除固定（Edge、商店、资源管理器） 
+echo   0. 返回(q) 
+call :print_separator "*" 70
 echo. 
 set /p submenu_option=请输入你的选择: 
 if "%submenu_option%"=="1" (
 	call :hide_taskview
 	call :hide_search
 	call :taskbar_unpin
-	call :taskbar_auto_hide_on
 	call :widgets_uninstall
 	call :restart_explorer
     echo 操作完成！& timeout /t 2
@@ -398,7 +402,15 @@ if "%submenu_option%"=="1" (
 ) else if "%submenu_option%"=="12" (
 	call :taskbar_auto_hide_off
     echo 操作完成！& timeout /t 2
-) else if "%submenu_option%"=="0" exit /b
+) else if "%submenu_option%"=="13" (
+	call :taskbar_time_second 1
+	echo 操作完成！& timeout /t 2
+) else if "%submenu_option%"=="14" (
+	call :taskbar_time_second 0
+	echo 操作完成！& timeout /t 2
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto taskbar
 
 :widgets_disable
@@ -453,32 +465,43 @@ echo 正在隐藏搜索...OK
 exit /b
 
 :search_icon
-echo 正在设置搜索图标...
+echo 正在设置搜索图标... 
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f >nul 2>&1
-echo 设置搜索图标...OK
+echo 设置搜索图标...OK 
 exit /b
 
 :search_icon
-echo 正在设置搜索图标...
+echo 正在设置搜索图标... 
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f >nul 2>&1
-echo 设置搜索图标...OK
+echo 设置搜索图标...OK 
 exit /b
 
 :taskbar_unpin
-echo 正在清除任务栏固定项目...
+echo 正在清除任务栏固定项目... 
 del /f /q "%AppData%\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\*" >nul 2>&1
 reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband /f >nul 2>&1
-echo 正在清除任务栏固定项目...OK
+echo 正在清除任务栏固定项目...OK 
 exit /b
 
 :taskbar_auto_hide_on
-echo 开启任务栏自动隐藏...
+echo 开启任务栏自动隐藏... 
 powershell -Command "&{$p='HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3'; $v=(Get-ItemProperty -Path $p).Settings; $v[8]=3; Set-ItemProperty -Path $p -Name Settings -Value $v; Stop-Process -Name explorer -Force}"
 exit /b
 
 :taskbar_auto_hide_off
-echo 关闭任务栏自动隐藏...
+echo 关闭任务栏自动隐藏... 
 powershell -Command "&{$p='HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3'; $v=(Get-ItemProperty -Path $p).Settings; $v[8]=2; Set-ItemProperty -Path $p -Name Settings -Value $v; Stop-Process -Name explorer -Force}"
+exit /b
+
+::任务栏时间显示秒 0:隐藏 1:显示
+:taskbar_time_second
+set value=%~1
+if "%value%"=="1" (
+    echo 设置任务栏时间显示秒 
+) else if "%value%"=="0" (
+    echo 设置任务栏时间隐藏秒 
+)
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowSecondsInSystemClock" /t REG_DWORD /d %value% /f >nul 2>&1
 exit /b
 
 :: 资源管理器设置 
@@ -497,7 +520,7 @@ echo  8. 隐藏 复选框
 echo  9. 显示 系统隐藏文件 
 echo 10. 隐藏 系统隐藏文件 
 echo 11. Windows 10 此电脑文件夹设置 
-echo  0. 返回 
+echo  0. 返回(q) 
 call :print_separator
 echo. 
 set /p submenu_option=请输入你的选择: 
@@ -542,7 +565,9 @@ if "%submenu_option%"=="1" (
 	echo 已隐藏系统隐藏文件，正在重启资源管理器 & timeout /t 6
 ) else if "%submenu_option%"=="11" (
 	call :this_computer_folder
-) else if "%submenu_option%"=="0" exit /b
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto :explorer_setting
 
 :: 安装 Office
@@ -565,9 +590,11 @@ set "submenu_option="
 call :print_separator
 echo  1. 禁用Windows更新 
 echo  2. 启用Windows更新 
-echo  3. 暂停更新1000周 
+echo  3. 暂停更新1000周*
 echo  4. 暂停更新5周（默认） 
-echo  0. 返回
+echo  0. 返回(q) 
+call :print_separator "."
+echo   建议选暂停更新1000周，影响较小。
 call :print_separator
 echo.
 set /p submenu_option=请输入你的选择: 
@@ -629,7 +656,9 @@ if "%submenu_option%"=="1" (
 	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 35 /f >nul 2>&1
 	start ms-settings:windowsupdate
 	echo 请手动选择暂停更新周期 & timeout /t 5
-) else if "%submenu_option%"=="0" exit /b
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto windows_update
 
 :: 下载 Windows
@@ -640,7 +669,7 @@ call :print_separator
 echo   1. 山己几子木      https://msdn.sjjzm.com/ 
 echo   2. Microsoft官方   https://www.microsoft.com/zh-cn/software-download/ 
 echo   3. NEXT,ITELLYOU   https://next.itellyou.cn/
-echo   0. 返回
+echo   0. 返回(q) 
 call :print_separator
 echo.
 set /p submenu_option=请输入你的选择: 
@@ -648,6 +677,7 @@ if "%submenu_option%"=="1" start https://msdn.sjjzm.com/
 if "%submenu_option%"=="2" start https://www.microsoft.com/zh-cn/software-download/ 
 if "%submenu_option%"=="3" start https://next.itellyou.cn/
 if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto download_windows
 
 :: Windows 10 此电脑文件夹管理
@@ -663,7 +693,7 @@ echo   9. 隐藏 下载			10. 恢复 下载
 echo  11. 隐藏 音乐			12. 恢复 音乐 
 echo  13. 隐藏 桌面			14. 恢复 桌面 
 echo  15. 隐藏所有选项		16. 开启所有选项 
-echo   0. 返回
+echo   0. 返回(q) 
 call :print_separator
 echo.
 set /p submenu_option=请输入你的选择: 
@@ -755,7 +785,9 @@ if "%submenu_option%"=="1" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
-)  else if "%submenu_option%"=="0" exit /b
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto this_computer_folder
 
 :: UAC（用户账户控制）设置 子菜单 
@@ -766,7 +798,7 @@ call :print_separator
 echo  1. 从不通知（静默模式，推荐开发调试） 
 echo  2. 恢复默认（推荐普通用户） 
 echo  3. 彻底关闭（EnableLUA=0，需重启，UWP不可用） 
-echo  0. 返回 
+echo  0. 返回(q) 
 call :print_separator
 echo.
 set /p submenu_option=请输入你的选择: 
@@ -787,7 +819,9 @@ if "%submenu_option%"=="1" (
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f >nul 2>&1
 	echo 设置完成！请重启系统以生效。 
 	timeout /t 5
-)  else if "%submenu_option%"=="0" exit /b
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto uac_setting
 
 :: WIFI密码
@@ -827,7 +861,7 @@ echo  1. 禁用自动睡眠*
 echo  2. 打开电源选项 
 echo  3. 禁用休眠(删除 hiberfil.sys)* 
 echo  4. 启用休眠 
-echo  0. 返回 
+echo  0. 返回(q) 
 call :print_separator "~"
 echo 睡眠：保持内存通电，快速恢复(耗电少) 
 echo 休眠：将内存数据保存到硬盘 hiberfil.sys 后完全关机(零耗电) 
@@ -846,7 +880,9 @@ if "%submenu_option%"=="1" (
 ) else if "%submenu_option%"=="4" (
 	powercfg -h on
 	echo 已启用休眠 & timeout /t 4
-)else if "%submenu_option%"=="0" exit /b
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 endlocal
 goto power_setting
 
@@ -865,7 +901,7 @@ call :print_separator
 echo  1. 一键卸载预装应用* 
 echo  2. 卸载OneDrive 
 echo  3. 安装OneDrive 
-echo  0. 返回 
+echo  0. 返回(q) 
 call :print_separator "~"
 echo 预装的应用包括：
 echo   Microsoft 365 Copilot
@@ -918,7 +954,9 @@ if "%submenu_option%"=="1" (
 	echo 正在安装 OneDrive...
 	call :install_OneDrive
 	echo OneDrive 已安装！ & timeout /t 4
-)else if "%submenu_option%"=="0" exit /b
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
 goto pre_installed_app
 
 :uninstall_OneDrive
@@ -948,6 +986,111 @@ if exist "%SystemRoot%\System32\OneDriveSetup.exe" (
 )
 exit /b
 
+:: telnet设置
+:telnet_setting
+call :print_title "telnet设置"
+set "submenu_option="
+call :print_separator
+echo  1. 安装telnet客户端 
+echo  2. telehack.com 
+echo  0. 返回(q) 
+call :print_separator
+echo.
+set /p submenu_option=请输入你的选择: 
+if "%submenu_option%"=="1" (
+	call :install_telnet
+	timeout /t 4
+)else if "%submenu_option%"=="2" (
+	call :start_telehack
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
+goto :telnet_setting
+
+:: 安装telnet客户端 
+:install_telnet
+:: 检查Telnet客户端是否已安装 
+powershell -Command "Get-WindowsOptionalFeature -Online -FeatureName TelnetClient" | findstr /C:"Enabled"
+:: 如果没有安装Telnet客户端，则安装 
+if %errorlevel% neq 0 (
+    echo 安装 Telnet 客户端... 
+    powershell -Command "Enable-WindowsOptionalFeature -Online -FeatureName TelnetClient -All"
+    echo 安装完成! 
+) else (
+    echo Telnet 客户端已经安装 
+)
+exit /b
+
+:: 打开telehack
+:start_telehack
+echo. & echo.
+echo telehack.com 是一个非常有趣的 Telnet 站点，它模拟了一个怀旧的计算机网络环境，
+echo 呈现了80年代的早期互联网体验。 这个站点中的许多功能模仿了当时的计算机命令、程序和娱乐内容。 
+echo.
+echo 回车开始 & pause>nul
+start cmd /k "telnet telehack.com"
+exit /b
+
+:: 图一乐 
+:hahaha
+setlocal enabledelayedexpansion
+call :print_title "图一乐"
+set "submenu_option="
+call :print_separator
+echo  1. 假装更新            11. neal.fun             21. Poki(宝玩) 
+echo  2. 黑客打字            12. 人类基准测试         22. 邦戈猫 
+echo  3. 模拟macOS桌面       13. 时光邮局             23. 全历史 
+echo  4. windows93           14. 全球在线广播         24. 对称光绘 
+echo  5. IBM PC模拟器        15. 全球天气动态         25. 互联网坟墓 
+echo  6. 侏罗纪公园系统      16. 全球航班追踪         26. 语保工程（方言） 
+echo  7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放 
+echo  8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿 
+echo  9. 假装黑客            19. 能不能好好说话       29. 白噪音 
+echo 10. 无用网站            20. 自由钢琴             30. 宇宙的刻度 
+echo  0. 返回(q) 
+call :print_separator
+echo.
+set /p "submenu_option=请输入你的选择（回车随机选一个）: "
+if "%submenu_option%"=="" (
+    set /a "rand_num=!random! %% 30 + 1"
+    if !rand_num! lss 10 (set "submenu_option=0!rand_num!") else (set "submenu_option=!rand_num!")
+    echo [随机选择了 !submenu_option!]
+)
+if "%submenu_option%"=="1"  start https://fakeupdate.net/ 
+if "%submenu_option%"=="2"  start https://hackertyper.net/ 
+if "%submenu_option%"=="3"  start https://turbomac.netlify.app/ 
+if "%submenu_option%"=="4"  start https://www.windows93.net/ 
+if "%submenu_option%"=="5"  start https://www.pcjs.org/ 
+if "%submenu_option%"=="6"  start https://www.jurassicsystems.com/ 
+if "%submenu_option%"=="7"  start https://www.masswerk.at/jsuix/index.html 
+if "%submenu_option%"=="8"  start https://cybermap.kaspersky.com/cn 
+if "%submenu_option%"=="9"  start https://geektyper.com/ 
+if "%submenu_option%"=="10" start https://theuselessweb.com/ 
+if "%submenu_option%"=="11" start https://neal.fun/ 
+if "%submenu_option%"=="12" start https://humanbenchmark.com/ 
+if "%submenu_option%"=="13" start https://www.hi2future.com/ 
+if "%submenu_option%"=="14" start https://radio.garden/ 
+if "%submenu_option%"=="15" start https://earth.nullschool.net/zh-cn/ 
+if "%submenu_option%"=="16" start https://www.flightradar24.com/ 
+if "%submenu_option%"=="17" start http://www.staggeringbeauty.com/ 
+if "%submenu_option%"=="18" start https://suulnnka.github.io/BullshitGenerator/index.html 
+if "%submenu_option%"=="19" start https://lab.magiconch.com/nbnhhsh/ 
+if "%submenu_option%"=="20" start https://www.autopiano.cn/ 
+if "%submenu_option%"=="21" start https://poki.com/zh 
+if "%submenu_option%"=="22" start https://bongo.cat/ 
+if "%submenu_option%"=="23" start https://www.allhistory.com/ 
+if "%submenu_option%"=="24" start http://weavesilk.com/ 
+if "%submenu_option%"=="25" start https://wiki.archiveteam.org/ 
+if "%submenu_option%"=="26" start https://zhongguoyuyan.cn 
+if "%submenu_option%"=="27" start https://zoomquilt.org/ 
+if "%submenu_option%"=="28" start http://endless.horse/ 
+if "%submenu_option%"=="29" start https://asoftmurmur.com/ 
+if "%submenu_option%"=="30" start https://scaleofuniverse.com/zh 
+if "%submenu_option%"=="0" endlocal & exit /b
+if /i "%submenu_option%"=="q" endlocal & exit /b
+goto :hahaha
+
+goto :telnet_setting
 :: 分割线
 :: 参数1：分隔符字符，默认 *
 :: 参数2：重复次数，默认 60
@@ -969,7 +1112,7 @@ exit /b
 setlocal
 set "title=%~1" & cls 
 echo.
-set "space_str=                "   :: 这里设定 10 个空格
+set "space_str=                   " 
 echo !space_str!!title!
 endlocal
 exit /b
