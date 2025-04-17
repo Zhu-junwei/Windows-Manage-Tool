@@ -3,20 +3,21 @@
 %1 mshta vbscript:CreateObject("Shell.Application").ShellExecute("cmd.exe","/c %~s0 ::","","runas",1)(window.close)&&exit cd /d "%~dp0"
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
-set "title=Windows管理小工具 v1.9"
-title %title%
+set "title=Windows管理小工具"
+set "rversion=v2.0"
+title %title% %rversion%
 :: 主菜单 
 :main_menu 
-mode con cols=100 lines=20
+mode con cols=60 lines=25
 call :print_title "%title%" 
 set "main_option="
 call :print_separator
 echo   1. 右键菜单设置                  11. WIFI密码 
 echo   2. 桌面设置                      12. 电源管理 
-echo   3. 任务栏设置                    13. 预装应用管理
-echo   4. 资源管理器设置                14. Telnet 
-echo   5. 安装 Office                   15. 图一乐 
-echo   6. 激活 Windows ^& Office 
+echo   3. 任务栏设置                    13. 预装应用管理 
+echo   4. 资源管理器设置                14. 编辑hosts 
+echo   5. 安装 Office                   15. Telnet 
+echo   6. 激活 Windows ^& Office         16. 图一乐 
 echo   7. 下载 Windows
 echo   8. Windows更新设置 
 echo   9. UAC（用户账户控制）设置 
@@ -38,8 +39,9 @@ if "%main_option%"=="10" call :god_mod
 if "%main_option%"=="11" call :wifi_password
 if "%main_option%"=="12" call :power_setting
 if "%main_option%"=="13" call :pre_installed_app
-if "%main_option%"=="14" call :telnet_setting
-if "%main_option%"=="15" call :hahaha
+if "%main_option%"=="14" call :hosts_editor
+if "%main_option%"=="15" call :telnet_setting
+if "%main_option%"=="16" call :hahaha
 if "%main_option%"=="0"  goto byebye
 if /i "%main_option%"=="q" goto byebye
 goto main_menu 
@@ -339,6 +341,7 @@ exit /b
 
 :: 任务栏设置 
 :taskbar 
+mode con cols=70 lines=30
 color 0A
 call :print_title "任务栏设置" 
 set "submenu_option=" 
@@ -572,13 +575,11 @@ goto :explorer_setting
 
 :: 安装 Office
 :install_office
-call :print_title "安装 Office"
 start powershell -NoProfile -ExecutionPolicy Bypass -Command "irm officetool.plus | iex"
 exit /b
 
 :: 激活 Windows & Office
 :activate_windows
-title 激活 Windows & Office & cls
 start powershell -Command "irm https://get.activated.win | iex"
 exit /b
 
@@ -894,7 +895,7 @@ exit /b
 :: 预装应用管理
 :pre_installed_app
 color 0A
-mode con cols=100 lines=30
+mode con cols=60 lines=30
 call :print_title "预装应用管理"
 set "submenu_option="
 call :print_separator
@@ -986,7 +987,12 @@ if exist "%SystemRoot%\System32\OneDriveSetup.exe" (
 )
 exit /b
 
-:: telnet设置
+:: 编辑hosts 
+:hosts_editor
+start "" notepad "%SystemRoot%\system32\drivers\etc\hosts"
+exit /b
+
+:: telnet设置 
 :telnet_setting
 call :print_title "telnet设置"
 set "submenu_option="
@@ -1033,10 +1039,11 @@ exit /b
 
 :: 图一乐 
 :hahaha
+mode con cols=70 lines=30
 setlocal enabledelayedexpansion
 call :print_title "图一乐"
 set "submenu_option="
-call :print_separator
+call :print_separator "*" 70
 echo  1. 假装更新            11. neal.fun             21. Poki(宝玩) 
 echo  2. 黑客打字            12. 人类基准测试         22. 邦戈猫 
 echo  3. 模拟macOS桌面       13. 时光邮局             23. 全历史 
@@ -1048,7 +1055,7 @@ echo  8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无�
 echo  9. 假装黑客            19. 能不能好好说话       29. 白噪音 
 echo 10. 无用网站            20. 自由钢琴             30. 宇宙的刻度 
 echo  0. 返回(q) 
-call :print_separator
+call :print_separator "*" 70
 echo.
 set /p "submenu_option=请输入你的选择（回车随机选一个）: "
 if "%submenu_option%"=="" (
@@ -1090,7 +1097,6 @@ if "%submenu_option%"=="0" endlocal & exit /b
 if /i "%submenu_option%"=="q" endlocal & exit /b
 goto :hahaha
 
-goto :telnet_setting
 :: 分割线
 :: 参数1：分隔符字符，默认 *
 :: 参数2：重复次数，默认 60
