@@ -4,7 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具"
-set "rversion=v2.0"
+set "updated=20250525"
+set "rversion=v2.0.1"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -664,14 +665,15 @@ goto windows_update
 
 :: 下载 Windows
 :download_windows
+mode con cols=80 lines=25
 call :print_title "下载 Windows"
 set "submenu_option="
-call :print_separator
+call :print_separator * 80
 echo   1. 山己几子木      https://msdn.sjjzm.com/ 
 echo   2. Microsoft官方   https://www.microsoft.com/zh-cn/software-download/ 
 echo   3. NEXT,ITELLYOU   https://next.itellyou.cn/
 echo   0. 返回(q) 
-call :print_separator
+call :print_separator * 80
 echo.
 set /p submenu_option=请输入你的选择: 
 if "%submenu_option%"=="1" start https://msdn.sjjzm.com/ 
@@ -1041,7 +1043,7 @@ exit /b
 :hahaha
 mode con cols=70 lines=30
 setlocal enabledelayedexpansion
-call :print_title "图一乐"
+call :print_title "图一乐" 30
 set "submenu_option="
 call :print_separator "*" 70
 echo  1. 假装更新            11. neal.fun             21. Poki(宝玩) 
@@ -1054,12 +1056,13 @@ echo  7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放
 echo  8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿 
 echo  9. 假装黑客            19. 能不能好好说话       29. 白噪音 
 echo 10. 无用网站            20. 自由钢琴             30. 宇宙的刻度 
+echo 31. 空难信息网          32.童年在线游戏
 echo  0. 返回(q) 
 call :print_separator "*" 70
 echo.
 set /p "submenu_option=请输入你的选择（回车随机选一个）: "
 if "%submenu_option%"=="" (
-    set /a "rand_num=!random! %% 30 + 1"
+    set /a "rand_num=!random! %% 32 + 1"
     if !rand_num! lss 10 (set "submenu_option=0!rand_num!") else (set "submenu_option=!rand_num!")
     echo [随机选择了 !submenu_option!]
 )
@@ -1093,6 +1096,8 @@ if "%submenu_option%"=="27" start https://zoomquilt.org/
 if "%submenu_option%"=="28" start http://endless.horse/ 
 if "%submenu_option%"=="29" start https://asoftmurmur.com/ 
 if "%submenu_option%"=="30" start https://scaleofuniverse.com/zh 
+if "%submenu_option%"=="31" start https://www.planecrashinfo.com/ 
+if "%submenu_option%"=="32" start https://www.yikm.net/ 
 if "%submenu_option%"=="0" endlocal & exit /b
 if /i "%submenu_option%"=="q" endlocal & exit /b
 goto :hahaha
@@ -1115,10 +1120,16 @@ exit /b
 :: 打印标题 
 :: 参数1 = 文本内容 
 :print_title 
-setlocal
-set "title=%~1" & cls 
+setlocal & cls 
+set "title=%~1"
+set "count=%~2"
+if "%count%"=="" (
+    set "space_str=                   " 
+) else (
+    set "space_str="
+    for /L %%i in (1,1,%count%) do (set "space_str=!space_str! ")
+)
 echo.
-set "space_str=                   " 
 echo !space_str!!title!
 endlocal
 exit /b
