@@ -3,7 +3,7 @@
 %1 mshta vbscript:CreateObject("Shell.Application").ShellExecute("cmd.exe","/c %~s0 ::","","runas",1)(window.close)&&exit cd /d "%~dp0"
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
-set "title=Windows管理小工具"
+set "title=Windows管理小工具" 
 set "updated=20250525"
 set "rversion=v2.0.1"
 title %title% %rversion%
