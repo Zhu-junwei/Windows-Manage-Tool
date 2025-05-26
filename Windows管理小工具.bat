@@ -1115,7 +1115,7 @@ set "TEMP_HEAD=%TEMP%\_wmtool_head.tmp"
 set "UPDATE_SCRIPT=%TEMP%\_wmtool_update.bat"
 echo. & echo 正在检查是否有最新版本...
 :: 下载头部以检测版本
-curl.exe -s -r 0-512 "%RAW_URL%" -o "%TEMP_HEAD%"
+curl.exe -s --connect-timeout 5 --max-time 10 -r 0-512 "%RAW_URL%" -o "%TEMP_HEAD%"
 if not exist "%TEMP_HEAD%" (
     echo 错误：无法下载远程文件！请检查链接。
     pause
@@ -1136,21 +1136,21 @@ set "remote_rversion=!remote_rversion:"=!"
 echo.
 echo 本地版本号：%rversion%
 echo 本地更新时间：%updated%
-echo 远程版本号：!remote_rversion!
-echo 远程更新时间：!remote_updated!
+echo 远程版本号：%remote_rversion%
+echo 远程更新时间：%remote_updated%
 echo.
 :: 比较版本
 if not defined remote_updated (
 	echo 无法获取远程更新日期，放弃更新。 & timeout /t 5
 	exit /b
 )
-if %updated% GEQ !remote_updated! (
+if %remote_updated% LEQ %updated% (
 	echo 已是最新版本，无需更新。 & timeout /t 10
 	exit /b
 )
 :: 下载 ZIP 并提取 bat 文件
 echo 检测到新版本，正在下载...
-curl.exe -L -o "%ZIP_PATH%" "%ZIP_URL%"
+curl.exe -L --connect-timeout 5 --max-time 10 -o "%ZIP_PATH%" "%ZIP_URL%"
 if not exist "%ZIP_PATH%" (
 	echo 下载 zip 文件失败。 & timeout /t 5
 	exit /b
