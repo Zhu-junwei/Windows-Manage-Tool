@@ -17,9 +17,9 @@ echo   1. 右键菜单设置                  11. WIFI密码
 echo   2. 桌面设置                      12. 电源管理 
 echo   3. 任务栏设置                    13. 预装应用管理 
 echo   4. 资源管理器设置                14. 编辑hosts 
-echo   5. 安装 Office                   15. Telnet 
-echo   6. 激活 Windows ^& Office         16. 图一乐 
-echo   7. 下载 Windows
+echo   5. 下载 Office                   15. Telnet 
+echo   6. 下载 Windows                  16. 图一乐 
+echo   7. 激活 Windows ^& Office 
 echo   8. Windows更新设置 
 echo   9. UAC（用户账户控制）设置 
 echo  10. 上帝模式                      99. 检查更新 
@@ -31,9 +31,9 @@ if "%main_option%"=="1"  call :submenu_right_click
 if "%main_option%"=="2"  call :desktop
 if "%main_option%"=="3"  call :taskbar
 if "%main_option%"=="4"  call :explorer_setting
-if "%main_option%"=="5"  call :install_office
-if "%main_option%"=="6"  call :activate_windows
-if "%main_option%"=="7"  call :download_windows
+if "%main_option%"=="5"  call :download_office
+if "%main_option%"=="6"  call :download_windows
+if "%main_option%"=="7"  call :activate_windows
 if "%main_option%"=="8"  call :windows_update
 if "%main_option%"=="9"  call :uac_setting
 if "%main_option%"=="10" call :god_mod
@@ -575,10 +575,46 @@ if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
 goto :explorer_setting
 
-:: 安装 Office
-:install_office
-start powershell -NoProfile -ExecutionPolicy Bypass -Command "irm officetool.plus | iex"
-exit /b
+:: 下载 Office 
+:download_office
+call :print_title "下载 Office"
+set "submenu_option="
+call :print_separator
+echo  1. xb21cn 
+echo  2. Office Tool Plus 
+echo  0. 返回(q) 
+call :print_separator
+echo.
+set /p submenu_option=请输入你的选择: 
+if "%submenu_option%"=="1" start "" https://www.xb21cn.com/
+if "%submenu_option%"=="2" start powershell -NoProfile -ExecutionPolicy Bypass -Command "irm officetool.plus | iex"
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
+goto :download_office
+
+:: 下载 Windows
+:download_windows
+mode con cols=80 lines=25
+call :print_title "下载 Windows" 32
+set "submenu_option="
+call :print_separator * 80
+echo   1. 山己几子木      https://msdn.sjjzm.com/ 
+echo   2. Microsoft官方   https://www.microsoft.com/zh-cn/software-download/ 
+echo   3. NEXT,ITELLYOU   https://next.itellyou.cn/
+echo   4. 不忘初心        https://www.pc528.net/
+echo   5. 吻妻            https://www.newxitong.com/
+echo   0. 返回(q) 
+call :print_separator * 80
+echo.
+set /p submenu_option=请输入你的选择: 
+if "%submenu_option%"=="1" start https://msdn.sjjzm.com/ 
+if "%submenu_option%"=="2" start https://www.microsoft.com/zh-cn/software-download/ 
+if "%submenu_option%"=="3" start https://next.itellyou.cn/
+if "%submenu_option%"=="4" start https://www.pc528.net/
+if "%submenu_option%"=="5" start https://www.newxitong.com/
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
+goto download_windows
 
 :: 激活 Windows & Office
 :activate_windows
@@ -663,26 +699,6 @@ if "%submenu_option%"=="1" (
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
 goto windows_update
-
-:: 下载 Windows
-:download_windows
-mode con cols=80 lines=25
-call :print_title "下载 Windows"
-set "submenu_option="
-call :print_separator * 80
-echo   1. 山己几子木      https://msdn.sjjzm.com/ 
-echo   2. Microsoft官方   https://www.microsoft.com/zh-cn/software-download/ 
-echo   3. NEXT,ITELLYOU   https://next.itellyou.cn/
-echo   0. 返回(q) 
-call :print_separator * 80
-echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" start https://msdn.sjjzm.com/ 
-if "%submenu_option%"=="2" start https://www.microsoft.com/zh-cn/software-download/ 
-if "%submenu_option%"=="3" start https://next.itellyou.cn/
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
-goto download_windows
 
 :: Windows 10 此电脑文件夹管理
 :this_computer_folder
@@ -1057,7 +1073,7 @@ echo  7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放
 echo  8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿 
 echo  9. 假装黑客            19. 能不能好好说话       29. 白噪音 
 echo 10. 无用网站            20. 自由钢琴             30. 宇宙的刻度 
-echo 31. 空难信息网          32.童年在线游戏
+echo 31. 空难信息网          32. 童年在线游戏
 echo  0. 返回(q) 
 call :print_separator "*" 70
 echo.
