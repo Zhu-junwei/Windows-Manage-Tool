@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250526" 
-set "rversion=v2.0.2"
+set "updated=20250527" 
+set "rversion=v2.0.3"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -1121,41 +1121,29 @@ goto :hahaha
 
 :: 检查脚本更新 
 :update_script
-mode con cols=100 lines=25
+mode con cols=80 lines=25
 call :print_title "检查更新" 40
-call :print_separator "*" 100
-set "RAW_URL=https://raw.githubusercontent.com/Zhu-junwei/Windows-Manage-Tool/master/Windows管理小工具.bat"
-set "ZIP_URL=https://github.com/Zhu-junwei/Windows-Manage-Tool/archive/refs/heads/master.zip"
-set "ZIP_PATH=%TEMP%\WindowsManageTool.zip"
-set "TEMP_HEAD=%TEMP%\_wmtool_head.tmp"
+call :print_separator "*" 80
+set "jsonUrl=https://files.cnblogs.com/files/zjw-blog/config.json"
+set "BAT_NEW_TMP=%TEMP%\wmtool.tmp"
 set "UPDATE_SCRIPT=%TEMP%\_wmtool_update.bat"
 echo. & echo 正在检查是否有最新版本...
-:: 下载头部以检测版本
-curl.exe -s --connect-timeout 5 --max-time 10 -r 0-512 "%RAW_URL%" -o "%TEMP_HEAD%"
-if not exist "%TEMP_HEAD%" (
-    echo 错误：无法下载远程文件！请检查链接。
-    pause
-    exit /b 1
+for /f "usebackq tokens=1,* delims==" %%A in (`
+    powershell -NoLogo -Command ^
+    "$json = Invoke-RestMethod -Uri '%jsonUrl%' -UseBasicParsing;" ^
+    "Write-Output ('remote_updated=' + $json.WindowsManageTool.updated);" ^
+    "Write-Output ('remote_rversion=' + $json.WindowsManageTool.rversion);"^
+	"Write-Output ('download_url=' + $json.WindowsManageTool.url);"
+`) do (
+    set "%%A=%%B"
 )
-:: 提取版本号和更新时间
-set "remote_updated="
-set "remote_rversion="
-for /f "delims=" %%A in ('findstr /i "updated=" "%TEMP_HEAD%"') do (
-    for /f "tokens=2 delims==" %%B in ("%%A") do set "remote_updated=%%~B"
-)
-for /f "delims=" %%A in ('findstr /i "rversion=" "%TEMP_HEAD%"') do (
-    for /f "tokens=2 delims==" %%B in ("%%A") do set "remote_rversion=%%~B"
-)
-:: 去除引号
-set "remote_updated=!remote_updated:"=!"
-set "remote_rversion=!remote_rversion:"=!"
-echo.
-echo 本地版本号：%rversion%
-echo 本地更新时间：%updated%
-echo 远程版本号：%remote_rversion%
-echo 远程更新时间：%remote_updated%
-echo.
-:: 比较版本
+echo   ----------------------------------------------------------
+echo   ^|                           ^|                             ^| 
+echo   ^|  本地版本号：%rversion%       ^|    远程版本号：%remote_rversion%       ^|
+echo   ^|                           ^|                             ^|
+echo   ^|  本地更新时间：%updated%   ^|    远程更新时间：%remote_updated%   ^|
+echo   ^|                           ^|                             ^|
+echo   -----------------------------------------------------------
 if not defined remote_updated (
 	echo 无法获取远程更新日期，放弃更新。 & timeout /t 5
 	exit /b
@@ -1164,22 +1152,21 @@ if %remote_updated% LEQ %updated% (
 	echo 已是最新版本，无需更新。 & timeout /t 10
 	exit /b
 )
-:: 下载 ZIP 并提取 bat 文件
 echo 检测到新版本，正在下载...
-curl.exe -L --connect-timeout 5 --max-time 10 -o "%ZIP_PATH%" "%ZIP_URL%"
-if not exist "%ZIP_PATH%" (
-	echo 下载 zip 文件失败。 & timeout /t 5
-	exit /b
+curl.exe -s -L --connect-timeout 5 --max-time 10 -o "%BAT_NEW_TMP%" "%download_url%"
+if not exist "%BAT_NEW_TMP%" (
+	echo 下载最新文件文件失败。
+	pause & exit /b
 )
+ping -n 3 127.0.0.1 > nul
+set "MAIN_SCRIPT_PATH=%~f0"
 echo @echo off> "%UPDATE_SCRIPT%"
 echo chcp 65001^>nul >> "%UPDATE_SCRIPT%"
 echo echo 正在更新脚本，请稍候... >> "%UPDATE_SCRIPT%"
-echo powershell -nologo -noprofile -command "$zipPath = '%ZIP_PATH%'; $outPath = '%~f0'; Add-Type -AssemblyName System.IO.Compression.FileSystem; $zip = [IO.Compression.ZipFile]::OpenRead($zipPath); $entry = $zip.Entries | Where-Object { $_.FullName -eq 'Windows-Manage-Tool-master/Windows管理小工具.bat' }; if ($entry) { $stream = $entry.Open(); $fileStream = [System.IO.File]::Create($outPath); $stream.CopyTo($fileStream); $fileStream.Close(); $stream.Close(); Write-Host '更新完成：' $outPath } else { Write-Host '未找到目标文件。' } $zip.Dispose()" >> "%UPDATE_SCRIPT%"
+echo copy /Y "%BAT_NEW_TMP%" "%MAIN_SCRIPT_PATH%" >> "%UPDATE_SCRIPT%"
 echo echo 更新完成，正在重新启动... >> "%UPDATE_SCRIPT%"
-echo del "%ZIP_PATH%" ^>nul 2^>nul >> "%UPDATE_SCRIPT%"
-echo del "%TEMP_HEAD%" ^>nul 2^>nul >> "%UPDATE_SCRIPT%"
-::echo del "%%~f0" ^>nul 2^>nul >> "%UPDATE_SCRIPT%"
-echo start "" "%~f0" >> "%UPDATE_SCRIPT%"
+echo del "%BAT_NEW_TMP%" ^>nul 2^>nul >> "%UPDATE_SCRIPT%"
+echo start "" "%MAIN_SCRIPT_PATH%" >> "%UPDATE_SCRIPT%"
 echo exit >> "%UPDATE_SCRIPT%"
 start "" "%UPDATE_SCRIPT%"
 exit
