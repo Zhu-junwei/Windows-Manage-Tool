@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250527" 
-set "rversion=v2.0.3"
+set "updated=20250528" 
+set "rversion=v2.0.4"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -18,8 +18,8 @@ echo   2. 桌面设置                      12. 电源管理
 echo   3. 任务栏设置                    13. 预装应用管理 
 echo   4. 资源管理器设置                14. 编辑hosts 
 echo   5. 下载 Office                   15. Telnet 
-echo   6. 下载 Windows                  16. 图一乐 
-echo   7. 激活 Windows ^& Office 
+echo   6. 下载 Windows                  16. 网络管理 
+echo   7. 激活 Windows ^& Office         17. 图一乐 
 echo   8. Windows更新设置 
 echo   9. UAC（用户账户控制）设置 
 echo  10. 上帝模式                      99. 检查更新 
@@ -42,7 +42,8 @@ if "%main_option%"=="12" call :power_setting
 if "%main_option%"=="13" call :pre_installed_app
 if "%main_option%"=="14" call :hosts_editor
 if "%main_option%"=="15" call :telnet_setting
-if "%main_option%"=="16" call :hahaha
+if "%main_option%"=="16" call :network_setting
+if "%main_option%"=="17" call :hahaha
 if "%main_option%"=="99" call :update_script
 if "%main_option%"=="0"  goto byebye
 if /i "%main_option%"=="q" goto byebye
@@ -50,7 +51,7 @@ goto main_menu
 
 :: 右键菜单设置子菜单 
 :submenu_right_click
-call :print_title "右键菜单设置" 
+call :print_title "右键菜单设置" 24 
 set "submenu_option="
 call :print_separator
 echo  1. 切换 Windows 10 右键菜单
@@ -251,7 +252,7 @@ goto submenu_right_click
 
 :: 桌面设置
 :desktop
-call :print_title "桌面设置"
+call :print_title "桌面设置" 26 
 set "submenu_option="
 call :print_separator
 echo  1. 隐藏桌面图标小箭头 
@@ -345,7 +346,7 @@ exit /b
 :taskbar 
 mode con cols=70 lines=30
 color 0A
-call :print_title "任务栏设置" 
+call :print_title "任务栏设置" 30 
 set "submenu_option=" 
 call :print_separator "*" 70
 echo   1. 一键净化任务栏                     11. 自动隐藏任务栏 — 开启 
@@ -511,7 +512,7 @@ exit /b
 
 :: 资源管理器设置 
 :explorer_setting
-call :print_title "资源管理器设置" 
+call :print_title "资源管理器设置" 24
 set "submenu_option=" 
 call :print_separator
 echo  1. 默认打开 此电脑 
@@ -577,7 +578,7 @@ goto :explorer_setting
 
 :: 下载 Office 
 :download_office
-call :print_title "下载 Office"
+call :print_title "下载 Office" 25
 set "submenu_option="
 call :print_separator
 echo  1. xb21cn 
@@ -607,11 +608,11 @@ echo   0. 返回(q)
 call :print_separator * 80
 echo.
 set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" start https://msdn.sjjzm.com/ 
-if "%submenu_option%"=="2" start https://www.microsoft.com/zh-cn/software-download/ 
-if "%submenu_option%"=="3" start https://next.itellyou.cn/
-if "%submenu_option%"=="4" start https://www.pc528.net/
-if "%submenu_option%"=="5" start https://www.newxitong.com/
+if "%submenu_option%"=="1" start "" https://msdn.sjjzm.com/ 
+if "%submenu_option%"=="2" start "" https://www.microsoft.com/zh-cn/software-download/ 
+if "%submenu_option%"=="3" start "" https://next.itellyou.cn/
+if "%submenu_option%"=="4" start "" https://www.pc528.net/
+if "%submenu_option%"=="5" start "" https://www.newxitong.com/
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
 goto download_windows
@@ -846,7 +847,7 @@ goto uac_setting
 
 :: WIFI密码
 :wifi_password
-call :print_title "WIFI密码"
+call :print_title "WIFI密码" 25 
 setlocal EnableDelayedExpansion
 echo 获取系统连接过的WIFI账号和密码
 call :print_separator "="
@@ -874,7 +875,7 @@ exit /b
 
 :: 电源管理 
 :power_setting
-call :print_title "电源管理"
+call :print_title "电源管理" 25
 set "submenu_option="
 call :print_separator
 echo  1. 禁用自动睡眠* 
@@ -915,7 +916,7 @@ exit /b
 :pre_installed_app
 color 0A
 mode con cols=60 lines=30
-call :print_title "预装应用管理"
+call :print_title "预装应用管理" 24
 set "submenu_option="
 call :print_separator
 echo  1. 一键卸载预装应用* 
@@ -1013,7 +1014,7 @@ exit /b
 
 :: telnet设置 
 :telnet_setting
-call :print_title "telnet设置"
+call :print_title "telnet设置" 25
 set "submenu_option="
 call :print_separator
 echo  1. 安装telnet客户端 
@@ -1056,6 +1057,56 @@ echo 回车开始 & pause>nul
 start cmd /k "telnet telehack.com"
 exit /b
 
+:network_setting
+call :print_title "网络管理" 26
+set "submenu_option="
+call :print_separator
+echo  1. 网络信息
+echo  2. 打开网络连接控制面板
+echo  3. 清除DNS缓存 
+echo  4. ping检查 
+echo  5. tracert路由追踪 
+echo  6. 我的外网IP
+echo  0. 返回(q) 
+call :print_separator
+echo.
+set /p "submenu_option=请输入你的选择: "
+if "%submenu_option%"=="1" (
+	set "command_line=ipconfig /all"
+	start "!command_line!" cmd /k "!command_line!"
+) else if "%submenu_option%"=="2" (
+	start ncpa.cpl
+) else if "%submenu_option%"=="3" (
+	ipconfig /flushdns
+	timeout /t 4
+) else if "%submenu_option%"=="4" (
+    echo.
+    set "ping_target="
+    set /p "ping_target=请输入要ping的IP或域名[默认: baidu.com]: "
+    if "!ping_target!"=="" set "ping_target=baidu.com"
+    set "ping_loop="
+    set /p "ping_loop=是否持续检查? [y/N]: "
+    if /i "!ping_loop!"=="y" (
+        set "ping_cmd=ping !ping_target! -t"
+    ) else (
+        set "ping_cmd=ping !ping_target! -n 4"
+    )
+    start "Ping检查: !ping_target!" cmd /k "!ping_cmd!"
+) else if "%submenu_option%"=="5" (
+    echo.
+    set "trace_target="
+    set /p "trace_target=请输入要追踪的IP或域名[默认: baidu.com]: "
+    if "!trace_target!"=="" set "trace_target=baidu.com"
+    start "路由追踪: !trace_target!" cmd /k "tracert !trace_target!"
+) else if "%submenu_option%"=="6" (
+	echo.
+	curl.exe -s -L --connect-timeout 5 --max-time 10 https://myip.ipip.net/
+	echo https://myip.ipip.net 提供服务支持 & pause>nul
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
+goto :network_setting 
+
 :: 图一乐 
 :hahaha
 mode con cols=70 lines=30
@@ -1083,38 +1134,38 @@ if "%submenu_option%"=="" (
     if !rand_num! lss 10 (set "submenu_option=0!rand_num!") else (set "submenu_option=!rand_num!")
     echo [随机选择了 !submenu_option!]
 )
-if "%submenu_option%"=="1"  start https://fakeupdate.net/ 
-if "%submenu_option%"=="2"  start https://hackertyper.net/ 
-if "%submenu_option%"=="3"  start https://turbomac.netlify.app/ 
-if "%submenu_option%"=="4"  start https://www.windows93.net/ 
-if "%submenu_option%"=="5"  start https://www.pcjs.org/ 
-if "%submenu_option%"=="6"  start https://www.jurassicsystems.com/ 
-if "%submenu_option%"=="7"  start https://www.masswerk.at/jsuix/index.html 
-if "%submenu_option%"=="8"  start https://cybermap.kaspersky.com/cn 
-if "%submenu_option%"=="9"  start https://geektyper.com/ 
-if "%submenu_option%"=="10" start https://theuselessweb.com/ 
-if "%submenu_option%"=="11" start https://neal.fun/ 
-if "%submenu_option%"=="12" start https://humanbenchmark.com/ 
-if "%submenu_option%"=="13" start https://www.hi2future.com/ 
-if "%submenu_option%"=="14" start https://radio.garden/ 
-if "%submenu_option%"=="15" start https://earth.nullschool.net/zh-cn/ 
-if "%submenu_option%"=="16" start https://www.flightradar24.com/ 
-if "%submenu_option%"=="17" start http://www.staggeringbeauty.com/ 
-if "%submenu_option%"=="18" start https://suulnnka.github.io/BullshitGenerator/index.html 
-if "%submenu_option%"=="19" start https://lab.magiconch.com/nbnhhsh/ 
-if "%submenu_option%"=="20" start https://www.autopiano.cn/ 
-if "%submenu_option%"=="21" start https://poki.com/zh 
-if "%submenu_option%"=="22" start https://bongo.cat/ 
-if "%submenu_option%"=="23" start https://www.allhistory.com/ 
-if "%submenu_option%"=="24" start http://weavesilk.com/ 
-if "%submenu_option%"=="25" start https://wiki.archiveteam.org/ 
-if "%submenu_option%"=="26" start https://zhongguoyuyan.cn 
-if "%submenu_option%"=="27" start https://zoomquilt.org/ 
-if "%submenu_option%"=="28" start http://endless.horse/ 
-if "%submenu_option%"=="29" start https://asoftmurmur.com/ 
-if "%submenu_option%"=="30" start https://scaleofuniverse.com/zh 
-if "%submenu_option%"=="31" start https://www.planecrashinfo.com/ 
-if "%submenu_option%"=="32" start https://www.yikm.net/ 
+if "%submenu_option%"=="1"  start "" https://fakeupdate.net/ 
+if "%submenu_option%"=="2"  start "" https://hackertyper.net/ 
+if "%submenu_option%"=="3"  start "" https://turbomac.netlify.app/ 
+if "%submenu_option%"=="4"  start "" https://www.windows93.net/ 
+if "%submenu_option%"=="5"  start "" https://www.pcjs.org/ 
+if "%submenu_option%"=="6"  start "" https://www.jurassicsystems.com/ 
+if "%submenu_option%"=="7"  start "" https://www.masswerk.at/jsuix/index.html 
+if "%submenu_option%"=="8"  start "" https://cybermap.kaspersky.com/cn 
+if "%submenu_option%"=="9"  start "" https://geektyper.com/ 
+if "%submenu_option%"=="10" start "" https://theuselessweb.com/ 
+if "%submenu_option%"=="11" start "" https://neal.fun/ 
+if "%submenu_option%"=="12" start "" https://humanbenchmark.com/ 
+if "%submenu_option%"=="13" start "" https://www.hi2future.com/ 
+if "%submenu_option%"=="14" start "" https://radio.garden/ 
+if "%submenu_option%"=="15" start "" https://earth.nullschool.net/zh-cn/ 
+if "%submenu_option%"=="16" start "" https://www.flightradar24.com/ 
+if "%submenu_option%"=="17" start "" http://www.staggeringbeauty.com/ 
+if "%submenu_option%"=="18" start "" https://suulnnka.github.io/BullshitGenerator/index.html 
+if "%submenu_option%"=="19" start "" https://lab.magiconch.com/nbnhhsh/ 
+if "%submenu_option%"=="20" start "" https://www.autopiano.cn/ 
+if "%submenu_option%"=="21" start "" https://poki.com/zh 
+if "%submenu_option%"=="22" start "" https://bongo.cat/ 
+if "%submenu_option%"=="23" start "" https://www.allhistory.com/ 
+if "%submenu_option%"=="24" start "" http://weavesilk.com/ 
+if "%submenu_option%"=="25" start "" https://wiki.archiveteam.org/ 
+if "%submenu_option%"=="26" start "" https://zhongguoyuyan.cn 
+if "%submenu_option%"=="27" start "" https://zoomquilt.org/ 
+if "%submenu_option%"=="28" start "" http://endless.horse/ 
+if "%submenu_option%"=="29" start "" https://asoftmurmur.com/ 
+if "%submenu_option%"=="30" start "" https://scaleofuniverse.com/zh 
+if "%submenu_option%"=="31" start "" https://www.planecrashinfo.com/ 
+if "%submenu_option%"=="32" start "" https://www.yikm.net/ 
 if "%submenu_option%"=="0" endlocal & exit /b
 if /i "%submenu_option%"=="q" endlocal & exit /b
 goto :hahaha
@@ -1122,7 +1173,7 @@ goto :hahaha
 :: 检查脚本更新 
 :update_script
 mode con cols=80 lines=25
-call :print_title "检查更新" 40
+call :print_title "检查更新" 35
 call :print_separator "*" 80
 set "jsonUrl=https://files.cnblogs.com/files/zjw-blog/config.json"
 set "BAT_NEW_TMP=%TEMP%\wmtool.tmp"
@@ -1193,7 +1244,7 @@ setlocal & cls
 set "title=%~1"
 set "count=%~2"
 if "%count%"=="" (
-    set "space_str=                   " 
+    set "space_str=                     " 
 ) else (
     set "space_str="
     for /L %%i in (1,1,%count%) do (set "space_str=!space_str! ")
