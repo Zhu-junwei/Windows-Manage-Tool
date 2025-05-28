@@ -1067,6 +1067,7 @@ echo  3. 清除DNS缓存
 echo  4. ping检查 
 echo  5. tracert路由追踪 
 echo  6. 我的外网IP
+echo  7. 测速网
 echo  0. 返回(q) 
 call :print_separator
 echo.
@@ -1102,6 +1103,8 @@ if "%submenu_option%"=="1" (
 	echo.
 	curl.exe -s -L --connect-timeout 5 --max-time 10 https://myip.ipip.net/
 	echo https://myip.ipip.net 提供服务支持 & pause>nul
+) else if "%submenu_option%"=="7" (
+	start "" https://www.speedtest.cn/
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
