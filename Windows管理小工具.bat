@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250529" 
-set "rversion=v2.0.5"
+set "updated=20250530" 
+set "rversion=v2.0.6"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -23,7 +23,7 @@ echo   7. 激活 Windows ^& Office
 echo   8. Windows更新设置 
 echo   9. UAC（用户账户控制）设置 
 echo  10. 上帝模式                      99. 检查更新 
-echo   0. 退出(q) 
+echo   0. 退出(q)                       00. 关于 
 call :print_separator
 echo. 
 set /p main_option=请输入你的选择: 
@@ -44,6 +44,7 @@ if "%main_option%"=="14" call :hosts_editor
 if "%main_option%"=="15" call :network_setting
 if "%main_option%"=="16" call :hahaha
 if "%main_option%"=="99" call :update_script
+if "%main_option%"=="00" call :about_me
 if "%main_option%"=="0"  goto byebye
 if /i "%main_option%"=="q" goto byebye
 goto main_menu 
@@ -1010,15 +1011,16 @@ exit /b
 call :print_title "网络管理" 26
 set "submenu_option="
 call :print_separator
-echo  1. 网络信息
-echo  2. 打开网络连接控制面板
+echo  1. 网络信息 
+echo  2. 打开网络连接控制面板 
 echo  3. 清除DNS缓存 
 echo  4. ping检查 
 echo  5. tracert路由追踪 
-echo  6. 我的外网IP
-echo  7. 测速网
-echo  8. 安装telnet客户端 
-echo  9. telehack.com
+echo  6. 我的外网IP 
+echo  7. 检查端口占用 
+echo  8. 测速网 
+echo  9. 安装telnet客户端 
+echo 10. telehack.com
 echo  0. 返回(q) 
 call :print_separator
 echo.
@@ -1054,15 +1056,51 @@ if "%submenu_option%"=="1" (
 	curl.exe -s -L --connect-timeout 5 --max-time 10 https://myip.ipip.net/
 	echo https://myip.ipip.net 提供服务支持 & pause>nul
 ) else if "%submenu_option%"=="7" (
-	start "" https://www.speedtest.cn/
+	call :search_port
+	call :sleep "end.." 5
 ) else if "%submenu_option%"=="8" (
-	call :install_telnet
+	start "" https://www.speedtest.cn/
 ) else if "%submenu_option%"=="9" (
+	call :install_telnet
+) else if "%submenu_option%"=="10" (
 	call :start_telehack
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
 goto :network_setting 
+
+:search_port
+set "S_PORT="
+set /p S_PORT=请输入要查询的端口号： 
+if not defined S_PORT exit /b
+set "FOUND_PID="
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :%S_PORT% ^| findstr LISTENING') do (
+    set "FOUND_PID=%%a"
+    call :process_pid !FOUND_PID!
+    exit /b
+)
+echo 没有发现有程序占用端口 %S_PORT%
+exit /b
+
+:process_pid
+set "K_PID=%~1"
+echo 端口 %S_PORT% 被占用，PID：%K_PID%
+set "K_EXE="
+for /f "usebackq delims=" %%p in (`powershell -NoProfile -Command "Try { (Get-Process -Id %K_PID%).Path } Catch { '' }"`) do (
+    set "K_EXE=%%p"
+)
+if defined K_EXE (
+    echo 占用程序路径：!K_EXE!
+) else (
+    echo 无法获取进程路径（可能是系统进程或权限不足）。
+	exit /b
+)
+set "K_KILL="
+set /p K_KILL=是否结束该进程？(y/N)： 
+if /i "!K_KILL!"=="Y" (
+    taskkill /PID %K_PID% /F
+)
+exit /b
 
 :: 安装telnet客户端 
 :install_telnet
@@ -1078,7 +1116,6 @@ exit /b
 
 :: 打开telehack
 :start_telehack
-
 echo. & echo Telehack是ARPANET和Usenet的风格化界面的在线模拟，于2010年匿名创建。它是一个完整的多用户模拟，包括26,600+模拟主机，其文件时间跨度为1985年至1990年。 
 echo.
 echo 回车开始 & pause>nul
@@ -1184,7 +1221,7 @@ if %remote_updated% LEQ %updated% (
 	call :sleep "已是最新版本，无需更新。" 10
 	exit /b
 )
-
+echo 更新会替换本地bat文件，如果你有自定义修改请先备份后再更新。
 call :ask_confirm "检测到新版本，是否下载? (Y/n)? " y
 if errorlevel 1 exit /b
 call :sleep "正在下载..." 3
@@ -1204,6 +1241,30 @@ echo start "" "%MAIN_SCRIPT_PATH%" >> "%UPDATE_SCRIPT%"
 echo exit >> "%UPDATE_SCRIPT%"
 start "" "%UPDATE_SCRIPT%"
 exit
+
+:: 关于
+:about_me
+mode con cols=80 lines=25
+call :print_title "关于" 36
+call :print_separator "*" 80
+echo.
+echo    Windows-Manage-Tool(WMT),一个批处理Windows管理小工具，集成了多个系统设置 
+echo    管理工具，旨在简化日常维护和系统设置操作。因为我比较懒，所以做了这个工具。 
+echo. 
+echo. 当前版本：%rversion% 
+echo. 
+echo  更新地址： 
+echo. 
+echo      https://github.com/Zhu-junwei/Windows-Manage-Tool
+echo      https://wwqn.lanzoul.com/b0fpd626d 密码:enz1
+echo      https://files.cnblogs.com/files/zjw-blog/WindowsManageTool.sh
+echo.
+echo  特别鸣谢： 
+echo. 
+echo      博客园 批处理之家 吾爱破解 GitHub 蓝奏云 ChatGPT DeepSeek 
+echo.
+echo ^<- 回车返回 & pause>nul
+exit /b
 
 :: 分割线
 :: 参数1：分隔符字符，默认 *
