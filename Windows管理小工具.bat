@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250528" 
-set "rversion=v2.0.4"
+set "updated=20250529" 
+set "rversion=v2.0.5"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -17,9 +17,9 @@ echo   1. 右键菜单设置                  11. WIFI密码
 echo   2. 桌面设置                      12. 电源管理 
 echo   3. 任务栏设置                    13. 预装应用管理 
 echo   4. 资源管理器设置                14. 编辑hosts 
-echo   5. 下载 Office                   15. Telnet 
-echo   6. 下载 Windows                  16. 网络管理 
-echo   7. 激活 Windows ^& Office         17. 图一乐 
+echo   5. 下载 Office                   15. 网络管理 
+echo   6. 下载 Windows                  16. 图一乐 
+echo   7. 激活 Windows ^& Office         
 echo   8. Windows更新设置 
 echo   9. UAC（用户账户控制）设置 
 echo  10. 上帝模式                      99. 检查更新 
@@ -41,9 +41,8 @@ if "%main_option%"=="11" call :wifi_password
 if "%main_option%"=="12" call :power_setting
 if "%main_option%"=="13" call :pre_installed_app
 if "%main_option%"=="14" call :hosts_editor
-if "%main_option%"=="15" call :telnet_setting
-if "%main_option%"=="16" call :network_setting
-if "%main_option%"=="17" call :hahaha
+if "%main_option%"=="15" call :network_setting
+if "%main_option%"=="16" call :hahaha
 if "%main_option%"=="99" call :update_script
 if "%main_option%"=="0"  goto byebye
 if /i "%main_option%"=="q" goto byebye
@@ -73,11 +72,11 @@ if "%submenu_option%"=="1" (
 ) else if "%submenu_option%"=="3" (
 	echo 添加超级菜单...
 	call :add_SuperMenu
-	echo 添加超级菜单成功! & timeout /t 5
+	call :sleep "添加超级菜单成功!" 5
 ) else if "%submenu_option%"=="4" ( 
 	echo 删除超级菜单...
 	call :delete_SuperMenu
-	echo 超级菜单已删除! & timeout /t 5
+	call :sleep "超级菜单已删除" 5
 ) else if "%submenu_option%"=="5" ( 
     reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash" /v "MUIVerb" /t REG_SZ /d "Hash" /f >nul 2>&1
 	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash" /v "SubCommands" /t REG_SZ /d "" /f >nul 2>&1
@@ -95,11 +94,11 @@ if "%submenu_option%"=="1" (
 	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\06MD5\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm MD5 | format-list" /f >nul 2>&1
 	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\07RIPEMD160" /v "MUIVerb" /t REG_SZ /d "RIPEMD160" /f >nul 2>&1
 	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\07RIPEMD160\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm RIPEMD160 | format-list" /f >nul 2>&1
-	echo 添加Hash右键菜单完成! & timeout /t 3
+	call :sleep "添加Hash右键菜单完成!" 3
 )  else if "%submenu_option%"=="6" ( 
 	echo 正在删除Hash右键菜单...
 	reg delete "HKEY_CLASSES_ROOT\*\shell\GetFileHash" /f >nul 2>&1
-	echo Hash右键菜单已删除! & timeout /t 3
+	call :sleep "Hash右键菜单已删除!" 3
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -274,29 +273,29 @@ if "%submenu_option%"=="1" (
 	attrib -s -r -h "%userprofile%\AppData\Local\iconcache.db" >nul 2>&1
 	del "%userprofile%\AppData\Local\iconcache.db" /f /q >nul 2>&1
 	call :restart_explorer
-	echo 操作完成！& timeout /t 2
+	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="2" (
 	echo 正在显示桌面图标小箭头...
 	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons" /v 29 /f >nul 2>&1
 	attrib -s -r -h "%userprofile%\AppData\Local\iconcache.db" >nul 2>&1
 	del "%userprofile%\AppData\Local\iconcache.db" /f /q >nul 2>&1
 	call :restart_explorer
-	echo 操作完成！& timeout /t 2
+	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="3" (
 	echo 正在隐藏了解此图片...
 	REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}" /t REG_DWORD /d 1 /f >nul 2>&1
 	call :restart_explorer
-	echo 操作完成！& timeout /t 2
+	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="4" (
 	echo 正在显示了解此图片...
 	REG DELETE "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}" /f >nul 2>&1
 	call :restart_explorer
-	echo 操作完成！& timeout /t 2
+	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="5" (
 	rundll32 shell32.dll,Control_RunDLL desk.cpl,,0
 )else if "%submenu_option%"=="6" (
 	call :desktop_add_network
-	echo 网络连接已添加！& timeout /t 3
+	call :sleep "网络连接已添加！" 3
 )else if "%submenu_option%"=="7" (
 	call :desktop_add_ie
 	set "add_result=快捷方式创建成功！"
@@ -305,11 +304,11 @@ if "%submenu_option%"=="1" (
 )else if "%submenu_option%"=="8" (
 	REG ADD "HKCU\Control Panel\Desktop" /V PaintDesktopVersion /T REG_DWORD /D 1 /F >nul 2>&1
 	call :restart_explorer
-	echo 操作完成！& timeout /t 2
+	call :sleep "操作完成！" 2
 )else if "%submenu_option%"=="9" (
 	REG ADD "HKCU\Control Panel\Desktop" /V PaintDesktopVersion /T REG_DWORD /D 0 /F >nul 2>&1
 	call :restart_explorer
-	echo 操作完成！& timeout /t 2
+	call :sleep "操作完成！" 2
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -329,7 +328,7 @@ set "programFilesX86=%ProgramFiles(x86)%"
 set "targetPath=%programFilesX86%\Internet Explorer\iexplore.exe"
 set "workingDir=%programFilesX86%\Internet Explorer"
 if not exist "%targetPath%" (
-	echo 错误：未找到 Internet Explorer，请确认已安装 IE11 或启用 Windows 功能。
+	call :sleep "错误：未找到 Internet Explorer，请确认已安装 IE11 或启用 Windows 功能。" 10
 	endlocal & exit /b 1
 )
 powershell -command "$ws = New-Object -ComObject WScript.Shell; $lnk = $ws.CreateShortcut([Environment]::GetFolderPath('Desktop') + '\%shortcutName%.lnk'); $lnk.TargetPath = '%targetPath%'; $lnk.Arguments = '%args%'; $lnk.WorkingDirectory = '%workingDir%'; $lnk.Save()"
@@ -369,51 +368,51 @@ if "%submenu_option%"=="1" (
 	call :taskbar_unpin
 	call :widgets_uninstall
 	call :restart_explorer
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="2" (
 	call :widgets_disable
 	call :restart_explorer
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="3" (
 	call :widgets_enable
 	call :restart_explorer
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="4" (
 	call :widgets_uninstall
 	call :restart_explorer
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="5" (
 	call :widgets_install
 	call :restart_explorer
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 )  else if "%submenu_option%"=="6" (
 	call :hide_taskview
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="7" (
 	call :show_taskview
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="8" (
 	call :hide_search
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="9" (
 	call :search_icon
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="10" (
 	call :taskbar_unpin
 	call :restart_explorer
     echo 操作完成！& timeout /t 2
 ) else if "%submenu_option%"=="11" (
 	call :taskbar_auto_hide_on
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="12" (
 	call :taskbar_auto_hide_off
-    echo 操作完成！& timeout /t 2
+    call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="13" (
 	call :taskbar_time_second 1
-	echo 操作完成！& timeout /t 2
+	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="14" (
 	call :taskbar_time_second 0
-	echo 操作完成！& timeout /t 2
+	call :sleep "操作完成！" 2
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -532,43 +531,43 @@ echo.
 set /p submenu_option=请输入你的选择: 
 if "%submenu_option%"=="1" (
 	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "LaunchTo" /t REG_DWORD /d 1 /f >nul 2>&1
-	echo 已设置默认打开此电脑！& timeout /t 5
+	call :sleep "已设置默认打开此电脑！" 5
 ) else if "%submenu_option%"=="2" (
 	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "LaunchTo" /t REG_DWORD /d 0 /f >nul 2>&1
-	echo 已设置默认打开主文件夹！& timeout /t 5
+	call :sleep "已设置默认打开主文件夹！" 5
 ) else if "%submenu_option%"=="3" (
 	REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
 	call :restart_explorer
-	echo 已显示扩展名 & timeout /t 6
+	call :sleep "已显示扩展名" 6
 ) else if "%submenu_option%"=="4" (
 	REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 1 /f
 	call :restart_explorer
-	echo 已隐藏扩展名 & timeout /t 6
+	call :sleep "已隐藏扩展名" 6
 ) else if "%submenu_option%"=="5" (
 	REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /V IconUnderline /T REG_DWORD /D 2 /F >nul 2>&1
 	REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /V ShellState /T REG_BINARY /D 240000001ea8000000000000000000000000000001000000130000000000000062000000 /F >nul 2>&1
 	call :restart_explorer
-	echo 已设置单击打开文件！& timeout /t 3
+	call :sleep "已设置单击打开文件！" 3
 ) else if "%submenu_option%"=="6" (
 	REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /V ShellState /T REG_BINARY /D 240000003ea8000000000000000000000000000001000000130000000000000062000000 /F >nul 2>&1
 	call :restart_explorer
-	echo 已设置双击打开文件！& timeout /t 3
+	call :sleep "已设置双击打开文件！" 3
 ) else if "%submenu_option%"=="7" (
 	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "AutoCheckSelect" /t REG_DWORD /d 1 /f >nul 2>&1
-	echo 已显示复选框，手动刷新生效 & timeout /t 6
+	call :sleep "已显示复选框，手动刷新生效" 6
 ) else if "%submenu_option%"=="8" (
 	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "AutoCheckSelect" /t REG_DWORD /d 0 /f >nul 2>&1
-	echo 已隐藏复选框，手动刷新生效 & timeout /t 6
+	call :sleep "已隐藏复选框，手动刷新生效" 6
 ) else if "%submenu_option%"=="9" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowSuperHidden /t REG_DWORD /d 1 /f
 	call :restart_explorer
-	echo 已显示系统隐藏文件，正在重启资源管理器 & timeout /t 6
+	call :sleep "已显示系统隐藏文件，正在重启资源管理器" 6
 ) else if "%submenu_option%"=="10" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 2 /f >nul 2>&1
     reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowSuperHidden /t REG_DWORD /d 0 /f >nul 2>&1
 	call :restart_explorer
-	echo 已隐藏系统隐藏文件，正在重启资源管理器 & timeout /t 6
+	call :sleep "已隐藏系统隐藏文件，正在重启资源管理器" 6
 ) else if "%submenu_option%"=="11" (
 	call :this_computer_folder
 )
@@ -661,7 +660,7 @@ if "%submenu_option%"=="1" (
 	REG add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Gwx" /v "DisableGwx" /t REG_DWORD /d 1 /f >nul 2>&1
 	REG add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\EOSNotify" /v "DiscontinueEOS" /t REG_DWORD /d 1 /f >nul 2>&1
 	net start wuauserv
-	echo 系统已禁止更新 & timeout /t 5
+	call :sleep "系统已禁止更新" 5
 ) else if "%submenu_option%"=="2" (
 	echo 正在开启系统更新...
     net stop wuauserv
@@ -685,17 +684,17 @@ if "%submenu_option%"=="1" (
 	reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\WAU" /v "Disabled" /f >nul 2>&1
 	REG delete "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "DisableOSUpgrade"  /f >nul 2>&1
 	net start wuauserv
-	echo 系统已开启更新 & timeout /t 5
+	call :sleep "系统已开启更新" 5
 ) else if "%submenu_option%"=="3" (
 	echo 暂停更新1000周...
 	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 7000 /f >nul 2>&1
 	start ms-settings:windowsupdate
-	echo 请手动选择暂停更新周期 & timeout /t 5
+	call :sleep "请手动选择暂停更新周期" 5
 ) else if "%submenu_option%"=="4" (
 	echo 恢复默认暂停更新5周...
 	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 35 /f >nul 2>&1
 	start ms-settings:windowsupdate
-	echo 请手动选择暂停更新周期 & timeout /t 5
+	call :sleep "请手动选择暂停更新周期" 5
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -827,19 +826,16 @@ if "%submenu_option%"=="1" (
 	echo 正在设置为“从不通知”...
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 0 /f >nul 2>&1
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 0 /f >nul 2>&1
-	echo 完成！
-	timeout /t 3
+	call :sleep "完成！" 3
 ) else if "%submenu_option%"=="2" (
 	echo 正在恢复默认设置... 
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 5 /f >nul 2>&1
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 1 /f >nul 2>&1
-	echo 完成！ 
-	timeout /t 3
+	call :sleep "完成！" 3
 ) else if "%submenu_option%"=="3" (
 	echo 正在彻底关闭 UAC... 
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f >nul 2>&1
-	echo 设置完成！请重启系统以生效。 
-	timeout /t 5
+	call :sleep "设置完成！请重启系统以生效。 " 5
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -848,7 +844,7 @@ goto uac_setting
 :: WIFI密码
 :wifi_password
 call :print_title "WIFI密码" 25 
-setlocal EnableDelayedExpansion
+setlocal
 echo 获取系统连接过的WIFI账号和密码
 call :print_separator "="
 for /f "tokens=2 delims=:" %%i in ('netsh wlan show profiles ^| findstr "All User Profile"') do (
@@ -863,10 +859,8 @@ for /f "tokens=2 delims=:" %%i in ('netsh wlan show profiles ^| findstr "All Use
 	echo !output:~0,20! !password!
 )
 call :print_separator "="
-endlocal
-echo 获取完毕,按键任意键继续
-pause>nul
-exit /b
+echo 获取完毕,按键任意键继续 & pause>nul
+endlocal & exit /b
 
 :: 上帝模式
 :god_mod
@@ -892,15 +886,15 @@ set /p submenu_option=请输入你的选择:
 if "%submenu_option%"=="1" (
 	powercfg -change -standby-timeout-ac 0
 	powercfg -change -standby-timeout-dc 0
-	echo 已禁用自动睡眠 & timeout /t 3
+	call :sleep "已禁用自动睡眠" 3
 ) else if "%submenu_option%"=="2" (
 	control powercfg.cpl
 ) else if "%submenu_option%"=="3" (
 	powercfg -h off
-	echo 已禁用休眠 & timeout /t 4
+	call :sleep "已禁用休眠" 4
 ) else if "%submenu_option%"=="4" (
 	powercfg -h on
-	echo 已启用休眠 & timeout /t 4
+	call :sleep "已启用休眠" 4
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -970,11 +964,11 @@ if "%submenu_option%"=="1" (
 )else if "%submenu_option%"=="2" (
 	echo 卸载 OneDrive...
 	call :uninstall_OneDrive
-	echo OneDrive 已卸载！ & timeout /t 4
+	call :sleep "OneDrive 已卸载！" 4
 )else if "%submenu_option%"=="3" (
 	echo 正在安装 OneDrive...
 	call :install_OneDrive
-	echo OneDrive 已安装！ & timeout /t 4
+	call :sleep "OneDrive 已安装！" 4
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -1002,59 +996,14 @@ if exist "%SystemRoot%\System32\OneDriveSetup.exe" (
 ) else if exist "%SystemRoot%\SysWOW64\OneDriveSetup.exe" (
 	"%SystemRoot%\SysWOW64\OneDriveSetup.exe"
 ) else (
-	start https://www.microsoft.com/zh-cn/microsoft-365/onedrive/download
-	echo 找不到 OneDrive 安装程序，请手动下载安装！
+	call :sleep "找不到 OneDrive 安装程序，请手动下载安装！" 4 silent
+	start "" https://www.microsoft.com/zh-cn/microsoft-365/onedrive/download
 )
 exit /b
 
 :: 编辑hosts 
 :hosts_editor
 start "" notepad "%SystemRoot%\system32\drivers\etc\hosts"
-exit /b
-
-:: telnet设置 
-:telnet_setting
-call :print_title "telnet设置" 25
-set "submenu_option="
-call :print_separator
-echo  1. 安装telnet客户端 
-echo  2. telehack.com 
-echo  0. 返回(q) 
-call :print_separator
-echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
-	call :install_telnet
-	timeout /t 4
-)else if "%submenu_option%"=="2" (
-	call :start_telehack
-)
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
-goto :telnet_setting
-
-:: 安装telnet客户端 
-:install_telnet
-:: 检查Telnet客户端是否已安装 
-powershell -Command "Get-WindowsOptionalFeature -Online -FeatureName TelnetClient" | findstr /C:"Enabled"
-:: 如果没有安装Telnet客户端，则安装 
-if %errorlevel% neq 0 (
-    echo 安装 Telnet 客户端... 
-    powershell -Command "Enable-WindowsOptionalFeature -Online -FeatureName TelnetClient -All"
-    echo 安装完成! 
-) else (
-    echo Telnet 客户端已经安装 
-)
-exit /b
-
-:: 打开telehack
-:start_telehack
-echo. & echo.
-echo telehack.com 是一个非常有趣的 Telnet 站点，它模拟了一个怀旧的计算机网络环境，
-echo 呈现了80年代的早期互联网体验。 这个站点中的许多功能模仿了当时的计算机命令、程序和娱乐内容。 
-echo.
-echo 回车开始 & pause>nul
-start cmd /k "telnet telehack.com"
 exit /b
 
 :network_setting
@@ -1068,6 +1017,8 @@ echo  4. ping检查
 echo  5. tracert路由追踪 
 echo  6. 我的外网IP
 echo  7. 测速网
+echo  8. 安装telnet客户端 
+echo  9. telehack.com
 echo  0. 返回(q) 
 call :print_separator
 echo.
@@ -1079,19 +1030,18 @@ if "%submenu_option%"=="1" (
 	start ncpa.cpl
 ) else if "%submenu_option%"=="3" (
 	ipconfig /flushdns
-	timeout /t 4
+	call :sleep " " 4
 ) else if "%submenu_option%"=="4" (
     echo.
     set "ping_target="
     set /p "ping_target=请输入要ping的IP或域名[默认: baidu.com]: "
     if "!ping_target!"=="" set "ping_target=baidu.com"
-    set "ping_loop="
-    set /p "ping_loop=是否持续检查? [y/N]: "
-    if /i "!ping_loop!"=="y" (
-        set "ping_cmd=ping !ping_target! -t"
-    ) else (
-        set "ping_cmd=ping !ping_target! -n 4"
-    )
+	call :ask_confirm "是否持续检查? [y/N]? " n
+	if errorlevel 1 (
+		set "ping_cmd=ping !ping_target! -t"
+	) else (
+		set "ping_cmd=ping !ping_target! -n 4"
+	)
     start "Ping检查: !ping_target!" cmd /k "!ping_cmd!"
 ) else if "%submenu_option%"=="5" (
     echo.
@@ -1105,10 +1055,35 @@ if "%submenu_option%"=="1" (
 	echo https://myip.ipip.net 提供服务支持 & pause>nul
 ) else if "%submenu_option%"=="7" (
 	start "" https://www.speedtest.cn/
+) else if "%submenu_option%"=="8" (
+	call :install_telnet
+) else if "%submenu_option%"=="9" (
+	call :start_telehack
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
 goto :network_setting 
+
+:: 安装telnet客户端 
+:install_telnet
+powershell -Command "(Get-WindowsOptionalFeature -Online -FeatureName TelnetClient).State -eq 'Enabled'" | findstr "True" >nul
+if %errorlevel% neq 0 (
+    echo 安装 telnet 客户端... 
+    powershell -Command "Enable-WindowsOptionalFeature -Online -FeatureName TelnetClient -All"
+	call :sleep "telnet安装完成!" 4
+) else (
+	call :sleep "telnet客户端已经安装" 4
+)
+exit /b
+
+:: 打开telehack
+:start_telehack
+
+echo. & echo Telehack是ARPANET和Usenet的风格化界面的在线模拟，于2010年匿名创建。它是一个完整的多用户模拟，包括26,600+模拟主机，其文件时间跨度为1985年至1990年。 
+echo.
+echo 回车开始 & pause>nul
+start cmd /k "telnet telehack.com"
+exit /b
 
 :: 图一乐 
 :hahaha
@@ -1181,7 +1156,7 @@ call :print_separator "*" 80
 set "jsonUrl=https://files.cnblogs.com/files/zjw-blog/config.json"
 set "BAT_NEW_TMP=%TEMP%\wmtool.tmp"
 set "UPDATE_SCRIPT=%TEMP%\_wmtool_update.bat"
-echo. & echo 正在检查是否有最新版本...
+echo.
 for /f "usebackq tokens=1,* delims==" %%A in (`
     powershell -NoLogo -Command ^
     "$json = Invoke-RestMethod -Uri '%jsonUrl%' -UseBasicParsing;" ^
@@ -1191,28 +1166,33 @@ for /f "usebackq tokens=1,* delims==" %%A in (`
 `) do (
     set "%%A=%%B"
 )
-echo   ----------------------------------------------------------
-echo   ^|                           ^|                             ^| 
-echo   ^|  本地版本号：%rversion%       ^|    远程版本号：%remote_rversion%       ^|
-echo   ^|                           ^|                             ^|
-echo   ^|  本地更新时间：%updated%   ^|    远程更新时间：%remote_updated%   ^|
-echo   ^|                           ^|                             ^|
-echo   -----------------------------------------------------------
+echo        ┌─────────────────────────────┬────────────────────────────┐ 
+echo        │             本地            │             远程           │ 
+echo        ├─────────────────────────────┼────────────────────────────│ 
+echo        │                             │                            │ 
+echo        │     版本号：%rversion%          │     版本号：%remote_rversion%         │ 
+echo        │                             │                            │ 
+echo        │     更新时间：%updated%      │     更新时间：%remote_updated%     │ 
+echo        │                             │                            │ 
+echo        └─────────────────────────────┴────────────────────────────┘ 
+echo.
 if not defined remote_updated (
-	echo 无法获取远程更新日期，放弃更新。 & timeout /t 5
+	call :sleep "无法获取远程更新日期，放弃更新。" 5
 	exit /b
 )
 if %remote_updated% LEQ %updated% (
-	echo 已是最新版本，无需更新。 & timeout /t 10
+	call :sleep "已是最新版本，无需更新。" 10
 	exit /b
 )
-echo 检测到新版本，正在下载...
+
+call :ask_confirm "检测到新版本，是否下载? (Y/n)? " y
+if errorlevel 1 exit /b
+call :sleep "正在下载..." 3
 curl.exe -s -L --connect-timeout 5 --max-time 10 -o "%BAT_NEW_TMP%" "%download_url%"
 if not exist "%BAT_NEW_TMP%" (
-	echo 下载最新文件文件失败。
-	pause & exit /b
+	call :sleep "下载最新文件文件失败。" 10
+	exit /b
 )
-ping -n 3 127.0.0.1 > nul
 set "MAIN_SCRIPT_PATH=%~f0"
 echo @echo off> "%UPDATE_SCRIPT%"
 echo chcp 65001^>nul >> "%UPDATE_SCRIPT%"
@@ -1254,14 +1234,38 @@ if "%count%"=="" (
 )
 echo.
 echo !space_str!!title!
-endlocal
-exit /b
+endlocal & exit /b
 
 :restart_explorer
-taskkill /f /im explorer.exe >nul 2>&1 & start explorer
-exit /b
+taskkill /f /im explorer.exe >nul 2>&1 & start explorer & exit /b
+
+:: 选择询问 如果选了默认值，errorlevel是0，否则是1
+:: 参数1：提示信息 
+:: 参数2：默认值 
+:ask_confirm
+setlocal
+set "input="
+set /p "input=%~1"
+if not defined input set "input=%~2"
+if /i "%input%"=="%~2" (endlocal & exit /b 0) else (endlocal & exit /b 1)
+
+:: 等待一会儿再继续 
+:: 参数1：提示信息(默认"请稍候...") 
+:: 参数2：等待时间(默认1s) 
+:: 参数3：可选silent，是否静默等待（默认显示倒计时） 
+:sleep
+setlocal
+set "msg=%~1" & set "sec=%~2" & set "silent=%~3"
+if not defined msg set "msg=请稍候..." 
+if not defined sec set "sec=1"
+echo.%msg%
+if /i "%silent%"=="silent" (
+    timeout /t %sec% >nul
+) else (
+    timeout /t %sec%
+)
+endlocal & exit /b
 
 :byebye
-echo byebye
-ping -n 2 127.0.0.1 > nul
+call :sleep "byebye" 1 silent
 exit
