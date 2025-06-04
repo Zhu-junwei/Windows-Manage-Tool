@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250530" 
-set "rversion=v2.0.6"
+set "updated=20250604" 
+set "rversion=v2.0.7"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -264,6 +264,7 @@ echo  6. 添加网络连接
 echo  7. 添加IE快捷方式
 echo  8. 显示windows版本水印 
 echo  9. 隐藏windows版本水印
+echo 10. 设置Bing每日桌面背景
 echo  0. 返回(q) 
 call :print_separator
 echo.
@@ -310,6 +311,9 @@ if "%submenu_option%"=="1" (
 	REG ADD "HKCU\Control Panel\Desktop" /V PaintDesktopVersion /T REG_DWORD /D 0 /F >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
+)else if "%submenu_option%"=="10" (
+	call :set_desktop_background
+	call :sleep "操作完成！" 10
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -339,6 +343,34 @@ endlocal & exit /b 0
 :: 删除桌面快捷方式
 :desktop_delete_shortcut
 del /f /q "%USERPROFILE%\Desktop\%~1.lnk" 2>nul
+exit /b
+
+:: 设置Bing每日桌面背景
+:set_desktop_background
+cls
+for /f "usebackq delims=" %%P in (`powershell -nologo -noprofile -command "[Environment]::GetFolderPath('MyPictures')"`) do (
+    set "downloadDir=%%P\BingWallpapers"
+)
+if not exist "!downloadDir!" mkdir "!downloadDir!"
+for /f %%d in ('powershell -command "Get-Date -Format 'yyyyMMdd'"') do (set "today=%%d")
+set "imageFile=!downloadDir!\bing_!today!.jpg"
+if not exist "%imageFile%" (
+	echo downloading...
+    set "baseUrl=https://www.bing.com"
+    for /f "delims=" %%i in ('powershell -Command "(Invoke-WebRequest '!baseUrl!/HPImageArchive.aspx?format=js&idx=0&n=1&nc=1614319565639&pid=hp&FORM=BEHPTB&uhd=1&uhdwidth=3840&uhdheight=2160').Content | ConvertFrom-Json | Select-Object -ExpandProperty images | Select-Object -ExpandProperty url" 2^>nul') do (
+        set "imageUrl=!baseUrl!%%i"
+    )
+    if defined imageUrl (
+        curl.exe --retry 2 --max-time 30 -so "!imageFile!" "!imageUrl!"
+    )
+)
+if exist "!imageFile!" (
+    echo 正在设置桌面背景...
+    powershell -Command "Add-Type -TypeDefinition 'using System.Runtime.InteropServices; public class Wallpaper { [DllImport(\"user32.dll\", CharSet=CharSet.Auto)] public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni); }'; [void][Wallpaper]::SystemParametersInfo(20, 0, '!imageFile!', 3)"
+	echo 桌面背景已更新为: !imageFile!
+) else (
+    echo 未能下载或找到图片文件
+)
 exit /b
 
 
@@ -914,11 +946,38 @@ mode con cols=60 lines=30
 call :print_title "预装应用管理" 24
 set "submenu_option="
 call :print_separator
-echo  1. 一键卸载预装应用* 
-echo  2. 卸载OneDrive 
-echo  3. 安装OneDrive 
+echo  1. 一键卸载预装应用 
+echo  2. 打开程序和功能 
+echo  3. 卸载OneDrive 
+echo  4. 安装OneDrive 
 echo  0. 返回(q) 
-call :print_separator "~"
+call :print_separator
+where winget >nul 2>&1
+if errorlevel 1 (
+    echo 未找到winget程序，此功能暂不可用，你可以安装后再尝试
+    echo https://apps.microsoft.com/store/detail/9NBLGGH4NNS1 & pause>nul
+	exit /b
+)
+set /p submenu_option=请输入你的选择: 
+if "%submenu_option%"=="1" (
+	call :uninstall_preinstalled_apps
+)else if "%submenu_option%"=="2" (
+	start "" appwiz.cpl
+)else if "%submenu_option%"=="3" (
+	echo 卸载 OneDrive...
+	call :uninstall_OneDrive
+	call :sleep "OneDrive 已卸载！" 4
+)else if "%submenu_option%"=="4" (
+	echo 正在安装 OneDrive...
+	call :install_OneDrive
+	call :sleep "OneDrive 已安装！" 4
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
+goto pre_installed_app
+
+::卸载预装应用
+:uninstall_preinstalled_apps
 echo 预装的应用包括：
 echo   Microsoft 365 Copilot
 echo   Microsoft Clipchamp
@@ -931,50 +990,38 @@ echo   Power Automate
 echo   资讯
 echo   Outlook for Windows
 echo   小组件
-call :print_separator
 echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
-	echo 正在卸载Microsoft 365 Copilot
-	winget uninstall "Microsoft 365 Copilot" --accept-source-agreements
-	echo 正在卸载Microsoft Clipchamp
-	winget uninstall "Microsoft Clipchamp"
-	echo 正在卸载Microsoft To Do
-	winget uninstall "Microsoft To Do"
-	echo 正在卸载Microsoft 必应
-	winget uninstall "Microsoft 必应"
-	echo 正在卸载Solitaire ^& Casual Games
-	winget uninstall "Solitaire & Casual Games"
-	echo 正在卸载Xbox
-	winget uninstall "Xbox"
-	echo 正在卸载Xbox TCUI
-	winget uninstall "Xbox TCUI"
-	echo 正在卸载Xbox Identity Provider
-	winget uninstall "Xbox Identity Provider"
-	echo 正在卸载反馈中心
-	winget uninstall "反馈中心"
-	echo 正在卸载资讯
-	winget uninstall "资讯"
-	echo 正在卸载Power Automate
-	winget uninstall "Power Automate"
-	echo 正在卸载Outlook for Windows
-	winget uninstall "Outlook for Windows"
-	call :widgets_uninstall
-	@echo off
-	echo 卸载预装应用完成 & timeout /t 4
-)else if "%submenu_option%"=="2" (
-	echo 卸载 OneDrive...
-	call :uninstall_OneDrive
-	call :sleep "OneDrive 已卸载！" 4
-)else if "%submenu_option%"=="3" (
-	echo 正在安装 OneDrive...
-	call :install_OneDrive
-	call :sleep "OneDrive 已安装！" 4
-)
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
-goto pre_installed_app
+call :ask_confirm "是否进行卸载? [Y/n]? " y
+if errorlevel 1 exit /b
+echo 正在卸载Microsoft 365 Copilot
+winget uninstall "Microsoft 365 Copilot" --accept-source-agreements
+echo 正在卸载Microsoft Clipchamp
+winget uninstall "Microsoft Clipchamp"
+echo 正在卸载Microsoft To Do
+winget uninstall "Microsoft To Do"
+echo 正在卸载Microsoft 必应
+winget uninstall "Microsoft 必应"
+echo 正在卸载Solitaire ^& Casual Games
+winget uninstall "Solitaire & Casual Games"
+echo 正在卸载Xbox
+winget uninstall "Xbox"
+echo 正在卸载Xbox TCUI
+winget uninstall "Xbox TCUI"
+echo 正在卸载Xbox Identity Provider
+winget uninstall "Xbox Identity Provider"
+echo 正在卸载反馈中心
+winget uninstall "反馈中心"
+echo 正在卸载资讯
+winget uninstall "资讯"
+echo 正在卸载Power Automate
+winget uninstall "Power Automate"
+echo 正在卸载Outlook for Windows
+winget uninstall "Outlook for Windows"
+call :widgets_uninstall
+echo 卸载预装应用完成 & timeout /t 4
+exit /b
 
+:: 卸载OneDrive
 :uninstall_OneDrive
 taskkill /f /im OneDrive.exe >nul 2>&1
 if exist "%SystemRoot%\System32\OneDriveSetup.exe" (
@@ -991,6 +1038,7 @@ reg delete "HKEY_CLASSES_ROOT\WOW6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2E
 reg delete "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >nul 2>&1
 exit /b
 
+:: 安装OneDrive
 :install_OneDrive
 if exist "%SystemRoot%\System32\OneDriveSetup.exe" (
 	"%SystemRoot%\System32\OneDriveSetup.exe"
@@ -1204,7 +1252,7 @@ for /f "usebackq tokens=1,* delims==" %%A in (`
     set "%%A=%%B"
 )
 echo        ┌─────────────────────────────┬────────────────────────────┐ 
-echo        │             本地            │             远程           │ 
+echo        │             本地            │             最新           │ 
 echo        ├─────────────────────────────┼────────────────────────────│ 
 echo        │                             │                            │ 
 echo        │     版本号：%rversion%          │     版本号：%remote_rversion%         │ 
@@ -1221,7 +1269,7 @@ if %remote_updated% LEQ %updated% (
 	call :sleep "已是最新版本，无需更新。" 10
 	exit /b
 )
-echo 更新会替换本地bat文件，如果你有自定义修改请先备份后再更新。
+echo 更新会替换本地bat文件，如果你有自定义修改请先备份后再更新。 
 call :ask_confirm "检测到新版本，是否下载? (Y/n)? " y
 if errorlevel 1 exit /b
 call :sleep "正在下载..." 3
