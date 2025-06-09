@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250604" 
-set "rversion=v2.0.7"
+set "updated=20250609" 
+set "rversion=v2.0.8"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -18,8 +18,8 @@ echo   2. 桌面设置                      12. 电源管理
 echo   3. 任务栏设置                    13. 预装应用管理 
 echo   4. 资源管理器设置                14. 编辑hosts 
 echo   5. 下载 Office                   15. 网络管理 
-echo   6. 下载 Windows                  16. 图一乐 
-echo   7. 激活 Windows ^& Office         
+echo   6. 下载 Windows                  16. 微软拼音输入法 
+echo   7. 激活 Windows ^& Office         17. 图一乐 
 echo   8. Windows更新设置 
 echo   9. UAC（用户账户控制）设置 
 echo  10. 上帝模式                      99. 检查更新 
@@ -42,7 +42,8 @@ if "%main_option%"=="12" call :power_setting
 if "%main_option%"=="13" call :pre_installed_app
 if "%main_option%"=="14" call :hosts_editor
 if "%main_option%"=="15" call :network_setting
-if "%main_option%"=="16" call :hahaha
+if "%main_option%"=="16" call :microsoft_pinyin
+if "%main_option%"=="17" call :hahaha
 if "%main_option%"=="99" call :update_script
 if "%main_option%"=="00" call :about_me
 if "%main_option%"=="0"  goto byebye
@@ -547,9 +548,9 @@ exit /b
 call :print_title "资源管理器设置" 24
 set "submenu_option=" 
 call :print_separator
-echo  1. 默认打开 此电脑 
-echo  2. 默认打开 主文件夹 
-echo  3. 显示 扩展(后缀)名 
+echo  1. 默认打开 此电脑         11. 禁用 U盘 
+echo  2. 默认打开 主文件夹       12. 启用 U盘 
+echo  3. 显示 扩展(后缀)名       13. Windows 10此电脑文件夹设置
 echo  4. 隐藏 扩展(后缀)名 
 echo  5. 单击 打开文件 
 echo  6. 双击 打开文件 
@@ -557,7 +558,6 @@ echo  7. 显示 复选框
 echo  8. 隐藏 复选框 
 echo  9. 显示 系统隐藏文件 
 echo 10. 隐藏 系统隐藏文件 
-echo 11. Windows 10 此电脑文件夹设置 
 echo  0. 返回(q) 
 call :print_separator
 echo. 
@@ -602,11 +602,132 @@ if "%submenu_option%"=="1" (
 	call :restart_explorer
 	call :sleep "已隐藏系统隐藏文件，正在重启资源管理器" 6
 ) else if "%submenu_option%"=="11" (
+	call :usbstor_setting 4
+	call :sleep "已禁用U盘使用" 6
+) else if "%submenu_option%"=="12" (
+	call :usbstor_setting 3
+	call :sleep "已启用U盘使用" 6
+) else if "%submenu_option%"=="13" (
 	call :this_computer_folder
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
 goto :explorer_setting
+
+:: U盘设置 4:禁用 3:启用
+:usbstor_setting
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\USBSTOR" /v Start /t REG_DWORD /d %~1 /f
+exit /b
+
+:: Windows 10 此电脑文件夹管理
+:this_computer_folder
+call :print_title "Windows 10 此电脑文件夹管理"
+set "submenu_option="
+call :print_separator
+echo   1. 隐藏 3D	 		 2. 恢复 3D 
+echo   3. 隐藏 视频			 4. 恢复 视频 
+echo   5. 隐藏 图片			 6. 恢复 图片 
+echo   7. 隐藏 文档			 8. 恢复 文档 
+echo   9. 隐藏 下载			10. 恢复 下载 
+echo  11. 隐藏 音乐			12. 恢复 音乐 
+echo  13. 隐藏 桌面			14. 恢复 桌面 
+echo  15. 隐藏所有选项		16. 开启所有选项 
+echo   0. 返回(q) 
+call :print_separator
+echo.
+set /p submenu_option=请输入你的选择: 
+if "%submenu_option%"=="1" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="2" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="3" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="4" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="5" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="6" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="7" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="8" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="9" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="10" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="11" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="12" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="13" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="14" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="15" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
+	call :restart_explorer
+) else if "%submenu_option%"=="16" (
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
+	call :restart_explorer
+)
+if "%submenu_option%"=="0" exit /b
+if /i "%submenu_option%"=="q" exit /b
+goto this_computer_folder
 
 :: 下载 Office 
 :download_office
@@ -732,116 +853,6 @@ if "%submenu_option%"=="1" (
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
 goto windows_update
-
-:: Windows 10 此电脑文件夹管理
-:this_computer_folder
-call :print_title "Windows 10 此电脑文件夹管理"
-set "submenu_option="
-call :print_separator
-echo   1. 隐藏 3D	 		 2. 恢复 3D 
-echo   3. 隐藏 视频			 4. 恢复 视频 
-echo   5. 隐藏 图片			 6. 恢复 图片 
-echo   7. 隐藏 文档			 8. 恢复 文档 
-echo   9. 隐藏 下载			10. 恢复 下载 
-echo  11. 隐藏 音乐			12. 恢复 音乐 
-echo  13. 隐藏 桌面			14. 恢复 桌面 
-echo  15. 隐藏所有选项		16. 开启所有选项 
-echo   0. 返回(q) 
-call :print_separator
-echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="2" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="3" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="4" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="5" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="6" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="7" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="8" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="9" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="10" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="11" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="12" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="13" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="14" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="15" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
-	call :restart_explorer
-) else if "%submenu_option%"=="16" (
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
-	call :restart_explorer
-)
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
-goto this_computer_folder
 
 :: UAC（用户账户控制）设置 子菜单 
 :uac_setting 
@@ -983,6 +994,8 @@ echo   Microsoft 365 Copilot
 echo   Microsoft Clipchamp
 echo   Microsoft To Do
 echo   Microsoft 必应
+echo   Microsoft 资讯
+echo   Game Bar
 echo   Solitaire ^& Casual Games
 echo   Xbox、Xbox TCUI、Xbox Identity Provider
 echo   反馈中心
@@ -999,8 +1012,12 @@ echo 正在卸载Microsoft Clipchamp
 winget uninstall "Microsoft Clipchamp"
 echo 正在卸载Microsoft To Do
 winget uninstall "Microsoft To Do"
-echo 正在卸载Microsoft 必应
+echo 正在卸载Microsoft 必应 
 winget uninstall "Microsoft 必应"
+echo 正在卸载Microsoft 资讯 
+winget uninstall "Microsoft 资讯"
+echo 正在卸载Game Bar
+winget uninstall "Game Bar"
 echo 正在卸载Solitaire ^& Casual Games
 winget uninstall "Solitaire & Casual Games"
 echo 正在卸载Xbox
@@ -1170,32 +1187,80 @@ echo 回车开始 & pause>nul
 start cmd /k "telnet telehack.com"
 exit /b
 
+:: 微软拼音输入法设置 
+:microsoft_pinyin
+setlocal enabledelayedexpansion
+call :print_title "微软拼音输入法设置"
+set "submenu_option="
+call :print_separator
+echo   1. 双拼输入 
+echo   2. 全拼输入 
+echo   3. 打开微软拼音设置 
+echo   0. 返回(q) 
+call :print_separator "~"
+echo  该设置仅用于【微软拼音输入法】，其他输入法请勿使用。 
+call :print_separator
+echo.
+set /p "submenu_option=请输入你的选择: "
+if "%submenu_option%"=="1" (
+	echo.&echo 可选双拼方案： 
+	echo   1. 软微双拼 
+	echo   2. 智能ABC 
+	echo   3. 自然码 
+	choice /c 123 /n /m "请输入双拼方案: " 
+	set /a sp_option=!errorlevel!
+	if !sp_option! == 1 set "sp_code=0"
+	if !sp_option! == 2 set "sp_code=1"
+	if !sp_option! == 3 set "sp_code=3"
+	call :microsoft_pinyin_select 1
+	call :microsoft_pinyin_sp !sp_code!
+	call :sleep "已设置双拼输入法" 6
+)else if "%submenu_option%"=="2" (
+	call :microsoft_pinyin_select 0
+	call :sleep "已设置全拼输入法" 6
+)else if "%submenu_option%"=="3" (
+	start ms-settings:regionlanguage-chsime-pinyin
+)
+if "%submenu_option%"=="0" endlocal & exit /b
+if /i "%submenu_option%"=="q" endlocal & exit /b
+endlocal
+goto :microsoft_pinyin
+
+:: 双拼输入法 0软微双拼 1智能ABC 3自然码 
+:microsoft_pinyin_sp
+reg add "HKEY_CURRENT_USER\Software\Microsoft\InputMethod\Settings\CHS" /v DoublePinyinScheme /t REG_DWORD /d %~1 /f >nul 2>&1
+exit /b
+
+:: 输入法 1双拼 0全拼
+:microsoft_pinyin_select
+reg add "HKEY_CURRENT_USER\Software\Microsoft\InputMethod\Settings\CHS" /v "Enable Double Pinyin" /t REG_DWORD /d %~1 /f >nul 2>&1
+exit /b
+
 :: 图一乐 
 :hahaha
-mode con cols=70 lines=30
+mode con cols=90 lines=30
 setlocal enabledelayedexpansion
-call :print_title "图一乐" 30
+call :print_title "图一乐" 40
 set "submenu_option="
-call :print_separator "*" 70
-echo  1. 假装更新            11. neal.fun             21. Poki(宝玩) 
-echo  2. 黑客打字            12. 人类基准测试         22. 邦戈猫 
-echo  3. 模拟macOS桌面       13. 时光邮局             23. 全历史 
-echo  4. windows93           14. 全球在线广播         24. 对称光绘 
-echo  5. IBM PC模拟器        15. 全球天气动态         25. 互联网坟墓 
-echo  6. 侏罗纪公园系统      16. 全球航班追踪         26. 语保工程（方言） 
+call :print_separator "*" 90
+echo  1. 假装更新            11. neal.fun             21. Poki              31. 空难信息网  
+echo  2. 黑客打字            12. 人类基准测试         22. 邦戈猫            32. 童年在线游戏
+echo  3. 模拟macOS桌面       13. 时光邮局             23. 全历史            33. 一分钟公园
+echo  4. windows93           14. 全球在线广播         24. 对称光绘          34. 图寻 
+echo  5. IBM PC模拟器        15. 全球天气动态         25. 互联网坟墓        35. 梦乡
+echo  6. 侏罗纪公园系统      16. 全球航班追踪         26. 语保工程          36. 猜密码 
 echo  7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放 
 echo  8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿 
 echo  9. 假装黑客            19. 能不能好好说话       29. 白噪音 
 echo 10. 无用网站            20. 自由钢琴             30. 宇宙的刻度 
-echo 31. 空难信息网          32. 童年在线游戏
 echo  0. 返回(q) 
-call :print_separator "*" 70
+call :print_separator "*" 90
 echo.
 set /p "submenu_option=请输入你的选择（回车随机选一个）: "
 if "%submenu_option%"=="" (
-    set /a "rand_num=!random! %% 32 + 1"
+    set /a "rand_num=!random! %% 36 + 1"
     if !rand_num! lss 10 (set "submenu_option=0!rand_num!") else (set "submenu_option=!rand_num!")
-    echo [随机选择了 !submenu_option!]
+	call :sleep "[随机选择了 !submenu_option!]" 2
 )
 if "%submenu_option%"=="1"  start "" https://fakeupdate.net/ 
 if "%submenu_option%"=="2"  start "" https://hackertyper.net/ 
@@ -1229,6 +1294,10 @@ if "%submenu_option%"=="29" start "" https://asoftmurmur.com/
 if "%submenu_option%"=="30" start "" https://scaleofuniverse.com/zh 
 if "%submenu_option%"=="31" start "" https://www.planecrashinfo.com/ 
 if "%submenu_option%"=="32" start "" https://www.yikm.net/ 
+if "%submenu_option%"=="33" start "" https://oneminutepark.tv/
+if "%submenu_option%"=="34" start "" https://tuxun.fun/
+if "%submenu_option%"=="35" start "" http://yume.ly/
+if "%submenu_option%"=="36" start "" https://www.guessthepin.com/
 if "%submenu_option%"=="0" endlocal & exit /b
 if /i "%submenu_option%"=="q" endlocal & exit /b
 goto :hahaha
