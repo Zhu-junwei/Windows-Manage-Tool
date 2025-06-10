@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250609" 
-set "rversion=v2.0.8"
+set "updated=20250611" 
+set "rversion=v2.0.9"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -314,7 +314,7 @@ if "%submenu_option%"=="1" (
 	call :sleep "操作完成！" 2
 )else if "%submenu_option%"=="10" (
 	call :set_desktop_background
-	call :sleep "操作完成！" 10
+	call :sleep "10秒后自动返回..." 10
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -348,19 +348,26 @@ exit /b
 
 :: 设置Bing每日桌面背景
 :set_desktop_background
-cls
+setlocal EnableDelayedExpansion
 for /f "usebackq delims=" %%P in (`powershell -nologo -noprofile -command "[Environment]::GetFolderPath('MyPictures')"`) do (
     set "downloadDir=%%P\BingWallpapers"
 )
 if not exist "!downloadDir!" mkdir "!downloadDir!"
-for /f %%d in ('powershell -command "Get-Date -Format 'yyyyMMdd'"') do (set "today=%%d")
-set "imageFile=!downloadDir!\bing_!today!.jpg"
-if not exist "%imageFile%" (
-	echo downloading...
-    set "baseUrl=https://www.bing.com"
-    for /f "delims=" %%i in ('powershell -Command "(Invoke-WebRequest '!baseUrl!/HPImageArchive.aspx?format=js&idx=0&n=1&nc=1614319565639&pid=hp&FORM=BEHPTB&uhd=1&uhdwidth=3840&uhdheight=2160').Content | ConvertFrom-Json | Select-Object -ExpandProperty images | Select-Object -ExpandProperty url" 2^>nul') do (
-        set "imageUrl=!baseUrl!%%i"
-    )
+echo 正在获取图片信息... 
+set "baseUrl=https://www.bing.com"
+set "jsonUrl=!baseUrl!/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN&nc=1614319565639&pid=hp&FORM=BEHPTB&uhd=1&uhdwidth=3840&uhdheight=2160"
+for /f "usebackq tokens=1,* delims==" %%A in (`
+	powershell -nologo -command ^
+    "$json = Invoke-RestMethod -Uri '!jsonUrl!' -UseBasicParsing;" ^
+    "$img = $json.images[0];" ^
+    "Write-Output ('imageUrl=!baseUrl!' + $img.url);" ^
+    "Write-Output ('imageName=' + $img.enddate + '_'+ $img.title);" ^
+`) do (
+    set "%%A=%%B"
+)
+set "imageFile=!downloadDir!\!imageName!.jpg"
+if not exist !imageFile! (
+	echo 正在下载图片：!imageName!.jpg
     if defined imageUrl (
         curl.exe --retry 2 --max-time 30 -so "!imageFile!" "!imageUrl!"
     )
@@ -370,10 +377,9 @@ if exist "!imageFile!" (
     powershell -Command "Add-Type -TypeDefinition 'using System.Runtime.InteropServices; public class Wallpaper { [DllImport(\"user32.dll\", CharSet=CharSet.Auto)] public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni); }'; [void][Wallpaper]::SystemParametersInfo(20, 0, '!imageFile!', 3)"
 	echo 桌面背景已更新为: !imageFile!
 ) else (
-    echo 未能下载或找到图片文件
+    echo 未能下载或找到图片文件 
 )
-exit /b
-
+endlocal & exit /b
 
 :: 任务栏设置 
 :taskbar 
@@ -1259,8 +1265,8 @@ echo.
 set /p "submenu_option=请输入你的选择（回车随机选一个）: "
 if "%submenu_option%"=="" (
     set /a "rand_num=!random! %% 36 + 1"
-    if !rand_num! lss 10 (set "submenu_option=0!rand_num!") else (set "submenu_option=!rand_num!")
-	call :sleep "[随机选择了 !submenu_option!]" 2
+    set "submenu_option=!rand_num!"
+	call :sleep "随机选择了 !submenu_option! 正在打开网站……" 3
 )
 if "%submenu_option%"=="1"  start "" https://fakeupdate.net/ 
 if "%submenu_option%"=="2"  start "" https://hackertyper.net/ 
@@ -1365,10 +1371,12 @@ mode con cols=80 lines=25
 call :print_title "关于" 36
 call :print_separator "*" 80
 echo.
-echo    Windows-Manage-Tool(WMT),一个批处理Windows管理小工具，集成了多个系统设置 
-echo    管理工具，旨在简化日常维护和系统设置操作。因为我比较懒，所以做了这个工具。 
+echo    Windows-Manage-Tool(WMT),是一个主要在Windows11上使用的批处理 
+echo    小工具，集成了多个系统设置，旨在简化日常维护和系统设置操作。 
 echo. 
-echo. 当前版本：%rversion% 
+echo  当前版本：
+echo. 
+echo     %rversion% 
 echo. 
 echo  更新地址： 
 echo. 
