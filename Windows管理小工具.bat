@@ -5,7 +5,7 @@
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
 set "updated=20250611" 
-set "rversion=v2.0.9"
+set "rversion=v2.1.0"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -367,11 +367,11 @@ for /f "usebackq tokens=1,* delims==" %%A in (`
 )
 set "imageFile=!downloadDir!\!imageName!.jpg"
 if not exist !imageFile! (
-	echo 正在下载图片：!imageName!.jpg
-    if defined imageUrl (
-        curl.exe --retry 2 --max-time 30 -so "!imageFile!" "!imageUrl!"
-    )
-)
+    if "!imageUrl:~20,1!" NEQ "" (
+		echo 正在下载图片：!imageName!.jpg
+		curl.exe --retry 2 --max-time 30 -so "!imageFile!" "!imageUrl!"
+	)
+) else echo 图片!imageName!.jpg已存在，跳过下载 
 if exist "!imageFile!" (
     echo 正在设置桌面背景...
     powershell -Command "Add-Type -TypeDefinition 'using System.Runtime.InteropServices; public class Wallpaper { [DllImport(\"user32.dll\", CharSet=CharSet.Auto)] public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni); }'; [void][Wallpaper]::SystemParametersInfo(20, 0, '!imageFile!', 3)"
@@ -922,10 +922,11 @@ exit /b
 call :print_title "电源管理" 25
 set "submenu_option="
 call :print_separator
-echo  1. 禁用自动睡眠* 
-echo  2. 打开电源选项 
-echo  3. 禁用休眠(删除 hiberfil.sys)* 
-echo  4. 启用休眠 
+echo  1. 设置定时关机/重启/休眠 
+echo  2. 禁用自动睡眠* 
+echo  3. 打开电源选项 
+echo  4. 禁用休眠(删除 hiberfil.sys)* 
+echo  5. 启用休眠 
 echo  0. 返回(q) 
 call :print_separator "~"
 echo 睡眠：保持内存通电，快速恢复(耗电少) 
@@ -934,22 +935,61 @@ call :print_separator
 echo.
 set /p submenu_option=请输入你的选择: 
 if "%submenu_option%"=="1" (
+	call :power_schedule
+) else if "%submenu_option%"=="2" (
 	powercfg -change -standby-timeout-ac 0
 	powercfg -change -standby-timeout-dc 0
-	call :sleep "已禁用自动睡眠" 3
-) else if "%submenu_option%"=="2" (
-	control powercfg.cpl
+	echo 已禁用自动睡眠 & timeout /t 3
 ) else if "%submenu_option%"=="3" (
-	powercfg -h off
-	call :sleep "已禁用休眠" 4
+	control powercfg.cpl
 ) else if "%submenu_option%"=="4" (
+	powercfg -h off
+	echo 已禁用休眠 & timeout /t 4
+) else if "%submenu_option%"=="5" (
 	powercfg -h on
-	call :sleep "已启用休眠" 4
+	echo 已启用休眠 & timeout /t 4
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
-endlocal
 goto power_setting
+
+::定时关机/重启/休眠 
+:power_schedule
+setlocal
+echo  1.关机  2.重启 3.休眠 4.取消计划
+choice /c 1234 /n /m "请选择要执行的操作: "
+if "%errorlevel%"=="1" (
+    set operation=/s
+    set op_name=关机 
+) else if "%errorlevel%"=="2" (
+    set operation=/r
+    set op_name=重启 
+) else if "%errorlevel%"=="3" (
+    set operation=/h
+    set op_name=休眠 
+) else if "%errorlevel%"=="4" (
+    shutdown /a
+	call :sleep "已取消计划" 5
+	endlocal &exit /b
+)
+echo 1.设置分钟数  2.设置具体时间(HH:MM) 
+choice /c 12 /n /m "请选择时间设置方式: "
+if "%errorlevel%"=="1" (
+    set /p minu="请输入延迟分钟数(默认10分钟): "
+    if "!minu!"=="" set "minu=10" 
+    set /a seconds=minu*60
+) else if "%errorlevel%"=="2" (
+    set /p target_time="请输入目标时间 (如 23:30): "
+	set target_time=!target_time:：=:!
+	for /f %%s in ('powershell -Command "$now = Get-Date; $target = [datetime]::ParseExact(\"!target_time!\", \"HH:mm\", $now.Culture); if ($target -lt $now) { $target = $target.AddDays(1) } ; [int]($target - $now).TotalSeconds"') do (
+		set seconds=%%s
+	)
+)
+echo 正在设置!op_name!，如有其他设置将会重新覆盖...
+shutdown /a >nul 2>&1
+shutdown !operation! /t !seconds!
+call :sleep "已设置!op_name!" 10
+endlocal &exit /b
 
 :: 上帝模式
 :god_mod
