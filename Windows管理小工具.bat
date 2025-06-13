@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250611" 
-set "rversion=v2.1.0"
+set "updated=20250613" 
+set "rversion=v2.1.1"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -18,9 +18,9 @@ echo   2. 桌面设置                      12. 电源管理
 echo   3. 任务栏设置                    13. 预装应用管理 
 echo   4. 资源管理器设置                14. 编辑hosts 
 echo   5. 下载 Office                   15. 网络管理 
-echo   6. 下载 Windows                  16. 微软拼音输入法 
-echo   7. 激活 Windows ^& Office         17. 图一乐 
-echo   8. Windows更新设置 
+echo   6. 下载 Windows                  16. 设备管理 
+echo   7. 激活 Windows ^& Office         17. 微软拼音输入法 
+echo   8. Windows更新设置               18. 图一乐 
 echo   9. UAC（用户账户控制）设置 
 echo  10. 上帝模式                      99. 检查更新 
 echo   0. 退出(q)                       00. 关于 
@@ -42,8 +42,9 @@ if "%main_option%"=="12" call :power_setting
 if "%main_option%"=="13" call :pre_installed_app
 if "%main_option%"=="14" call :hosts_editor
 if "%main_option%"=="15" call :network_setting
-if "%main_option%"=="16" call :microsoft_pinyin
-if "%main_option%"=="17" call :hahaha
+if "%main_option%"=="16" call :device_setting
+if "%main_option%"=="17" call :microsoft_pinyin
+if "%main_option%"=="18" call :hahaha
 if "%main_option%"=="99" call :update_script
 if "%main_option%"=="00" call :about_me
 if "%main_option%"=="0"  goto byebye
@@ -968,9 +969,9 @@ if "%errorlevel%"=="1" (
     set operation=/h
     set op_name=休眠 
 ) else if "%errorlevel%"=="4" (
-    shutdown /a
-	call :sleep "已取消计划" 5
-	endlocal &exit /b
+    shutdown /a >nul 2>&1
+	if "!errorlevel!"=="1116" (call :sleep "没有正在运行的计划" 5 ) else ( call :sleep "已取消计划" 5)
+	endlocal & exit /b
 )
 echo 1.设置分钟数  2.设置具体时间(HH:MM) 
 choice /c 12 /n /m "请选择时间设置方式: "
@@ -985,11 +986,13 @@ if "%errorlevel%"=="1" (
 		set seconds=%%s
 	)
 )
-echo 正在设置!op_name!，如有其他设置将会重新覆盖...
+call :sleep "正在检查注销计划，请稍等..." 1 silent
 shutdown /a >nul 2>&1
+if "!errorlevel!"=="1116" (call :sleep "没有正在运行的计划" 1 silent) else ( call :sleep "已取消原计划" 1 silent)
+call :sleep "正在设置!op_name!，请稍等..." 1 silent
 shutdown !operation! /t !seconds!
 call :sleep "已设置!op_name!" 10
-endlocal &exit /b
+endlocal & exit /b
 
 :: 上帝模式
 :god_mod
@@ -1122,17 +1125,17 @@ exit /b
 call :print_title "网络管理" 26
 set "submenu_option="
 call :print_separator
-echo  1. 网络信息 
-echo  2. 打开网络连接控制面板 
-echo  3. 清除DNS缓存 
-echo  4. ping检查 
-echo  5. tracert路由追踪 
-echo  6. 我的外网IP 
-echo  7. 检查端口占用 
-echo  8. 测速网 
-echo  9. 安装telnet客户端 
-echo 10. telehack.com
-echo  0. 返回(q) 
+echo   1. 网络信息                  11. 远程桌面 
+echo   2. 打开网络连接控制面板      12. 一键断网/联网 
+echo   3. 清除DNS缓存 
+echo   4. ping检查 
+echo   5. tracert路由追踪 
+echo   6. 我的外网IP 
+echo   7. 检查端口占用 
+echo   8. 测速网 
+echo   9. 安装telnet客户端 
+echo  10. telehack.com
+echo   0. 返回(q) 
 call :print_separator
 echo.
 set /p "submenu_option=请输入你的选择: "
@@ -1149,7 +1152,7 @@ if "%submenu_option%"=="1" (
     set "ping_target="
     set /p "ping_target=请输入要ping的IP或域名[默认: baidu.com]: "
     if "!ping_target!"=="" set "ping_target=baidu.com"
-	call :ask_confirm "是否持续检查? [y/N]? " n
+	call :ask_confirm "是否持续检查? [y/N]: " n
 	if errorlevel 1 (
 		set "ping_cmd=ping !ping_target! -t"
 	) else (
@@ -1175,6 +1178,12 @@ if "%submenu_option%"=="1" (
 	call :install_telnet
 ) else if "%submenu_option%"=="10" (
 	call :start_telehack
+) else if "%submenu_option%"=="11" (
+	call :remote_desktop
+	call :sleep "远程桌面设置成功" 5
+) else if "%submenu_option%"=="12" (
+	call :internet_control
+	call :sleep "已设置网络状态！" 5
 )
 if "%submenu_option%"=="0" exit /b
 if /i "%submenu_option%"=="q" exit /b
@@ -1233,6 +1242,68 @@ echo 回车开始 & pause>nul
 start cmd /k "telnet telehack.com"
 exit /b
 
+:: 远程桌面 
+:remote_desktop
+setlocal
+choice /c 12 /n /m "远程桌面设置? [1.启用 2.关闭]: "
+if "%errorlevel%"=="1" (set "value=0") else ( set "value=1")
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d %value% /f
+endlocal & exit /b
+
+:: 一键联网控制 
+:internet_control
+choice /c 12 /n /m "一键联网控制? [1.断网 2.联网]: "
+if "%errorlevel%"=="1" (
+	powershell -Command "$ProgressPreference = 'SilentlyContinue';Get-NetAdapter | Disable-NetAdapter -Confirm:$false"
+) else (
+	powershell -Command "$ProgressPreference = 'SilentlyContinue';Get-NetAdapter | Enable-NetAdapter -Confirm:$false"
+)
+exit /b
+
+:: 设备管理 
+:device_setting
+call :print_title "设备管理" 25
+set "device="
+call :print_separator
+echo    1. 照相机 
+echo    2. 蓝牙 
+echo    0. 返回(q) 
+echo.
+call :print_separator "~"
+echo    通过禁用或开启对应功能来保护系统安全。
+call :print_separator
+echo.
+set /p "c=请选择你要管理的设备: "
+if not defined c goto :device_setting
+if "%c%"=="0" exit /b
+if /i "%c%"=="q" exit /b
+call :ask_confirm "选择你的操作? [1.禁用(默认)/2.启用]:" 1
+if errorlevel 1 (set "opt=Enable") else (set "opt=Disable")
+if "%c%"=="1" (
+	call :toggle_device_status "Camera" %opt%
+	echo %errorlevel%
+	call :toggle_device_status "Image" %opt%
+	echo %errorlevel%
+	call :sleep "已%opt%照相机" 5
+)else if "%c%"=="2" (
+	call :toggle_device_status "Bluetooth" %opt%
+	echo %errorlevel%
+	call :sleep "已%opt%蓝牙" 5
+)
+goto :device_setting
+
+:: 设备状态切换
+:: 参数1：设备，如Camera
+:: 参数2：操作，如Disable、Enable 
+:toggle_device_status
+setlocal 
+set "device=%~1" & set "%opt%=%~2"
+echo %device% %opt%
+powershell.exe -nologo -noprofile -Command "$ProgressPreference = 'SilentlyContinue';Get-PnpDevice -Class %device% | %opt%-PnpDevice -Confirm:$false" >nul 2>&1
+set ret=%errorlevel%
+endlocal & exit /b ret
+
+
 :: 微软拼音输入法设置 
 :microsoft_pinyin
 setlocal enabledelayedexpansion
@@ -1287,7 +1358,7 @@ exit /b
 mode con cols=90 lines=30
 setlocal enabledelayedexpansion
 call :print_title "图一乐" 40
-set "submenu_option="
+set "c="
 call :print_separator "*" 90
 echo  1. 假装更新            11. neal.fun             21. Poki              31. 空难信息网  
 echo  2. 黑客打字            12. 人类基准测试         22. 邦戈猫            32. 童年在线游戏
@@ -1295,57 +1366,58 @@ echo  3. 模拟macOS桌面       13. 时光邮局             23. 全历史     
 echo  4. windows93           14. 全球在线广播         24. 对称光绘          34. 图寻 
 echo  5. IBM PC模拟器        15. 全球天气动态         25. 互联网坟墓        35. 梦乡
 echo  6. 侏罗纪公园系统      16. 全球航班追踪         26. 语保工程          36. 猜密码 
-echo  7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放 
-echo  8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿 
+echo  7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放          37. A Real Me 
+echo  8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿           
 echo  9. 假装黑客            19. 能不能好好说话       29. 白噪音 
 echo 10. 无用网站            20. 自由钢琴             30. 宇宙的刻度 
 echo  0. 返回(q) 
 call :print_separator "*" 90
 echo.
-set /p "submenu_option=请输入你的选择（回车随机选一个）: "
-if "%submenu_option%"=="" (
-    set /a "rand_num=!random! %% 36 + 1"
-    set "submenu_option=!rand_num!"
-	call :sleep "随机选择了 !submenu_option! 正在打开网站……" 3
+set /p "c=请输入你的选择（回车随机选一个）: "
+if "%c%"=="" (
+    set /a "rand_num=!random! %% 38 + 1"
+    set "c=!rand_num!"
+	call :sleep "随机选择了 !c! 正在打开网站……" 3
 )
-if "%submenu_option%"=="1"  start "" https://fakeupdate.net/ 
-if "%submenu_option%"=="2"  start "" https://hackertyper.net/ 
-if "%submenu_option%"=="3"  start "" https://turbomac.netlify.app/ 
-if "%submenu_option%"=="4"  start "" https://www.windows93.net/ 
-if "%submenu_option%"=="5"  start "" https://www.pcjs.org/ 
-if "%submenu_option%"=="6"  start "" https://www.jurassicsystems.com/ 
-if "%submenu_option%"=="7"  start "" https://www.masswerk.at/jsuix/index.html 
-if "%submenu_option%"=="8"  start "" https://cybermap.kaspersky.com/cn 
-if "%submenu_option%"=="9"  start "" https://geektyper.com/ 
-if "%submenu_option%"=="10" start "" https://theuselessweb.com/ 
-if "%submenu_option%"=="11" start "" https://neal.fun/ 
-if "%submenu_option%"=="12" start "" https://humanbenchmark.com/ 
-if "%submenu_option%"=="13" start "" https://www.hi2future.com/ 
-if "%submenu_option%"=="14" start "" https://radio.garden/ 
-if "%submenu_option%"=="15" start "" https://earth.nullschool.net/zh-cn/ 
-if "%submenu_option%"=="16" start "" https://www.flightradar24.com/ 
-if "%submenu_option%"=="17" start "" http://www.staggeringbeauty.com/ 
-if "%submenu_option%"=="18" start "" https://suulnnka.github.io/BullshitGenerator/index.html 
-if "%submenu_option%"=="19" start "" https://lab.magiconch.com/nbnhhsh/ 
-if "%submenu_option%"=="20" start "" https://www.autopiano.cn/ 
-if "%submenu_option%"=="21" start "" https://poki.com/zh 
-if "%submenu_option%"=="22" start "" https://bongo.cat/ 
-if "%submenu_option%"=="23" start "" https://www.allhistory.com/ 
-if "%submenu_option%"=="24" start "" http://weavesilk.com/ 
-if "%submenu_option%"=="25" start "" https://wiki.archiveteam.org/ 
-if "%submenu_option%"=="26" start "" https://zhongguoyuyan.cn 
-if "%submenu_option%"=="27" start "" https://zoomquilt.org/ 
-if "%submenu_option%"=="28" start "" http://endless.horse/ 
-if "%submenu_option%"=="29" start "" https://asoftmurmur.com/ 
-if "%submenu_option%"=="30" start "" https://scaleofuniverse.com/zh 
-if "%submenu_option%"=="31" start "" https://www.planecrashinfo.com/ 
-if "%submenu_option%"=="32" start "" https://www.yikm.net/ 
-if "%submenu_option%"=="33" start "" https://oneminutepark.tv/
-if "%submenu_option%"=="34" start "" https://tuxun.fun/
-if "%submenu_option%"=="35" start "" http://yume.ly/
-if "%submenu_option%"=="36" start "" https://www.guessthepin.com/
-if "%submenu_option%"=="0" endlocal & exit /b
-if /i "%submenu_option%"=="q" endlocal & exit /b
+if "%c%"=="1"  start "" https://fakeupdate.net/ 
+if "%c%"=="2"  start "" https://hackertyper.net/ 
+if "%c%"=="3"  start "" https://turbomac.netlify.app/ 
+if "%c%"=="4"  start "" https://www.windows93.net/ 
+if "%c%"=="5"  start "" https://www.pcjs.org/ 
+if "%c%"=="6"  start "" https://www.jurassicsystems.com/ 
+if "%c%"=="7"  start "" https://www.masswerk.at/jsuix/index.html 
+if "%c%"=="8"  start "" https://cybermap.kaspersky.com/cn 
+if "%c%"=="9"  start "" https://geektyper.com/ 
+if "%c%"=="10" start "" https://theuselessweb.com/ 
+if "%c%"=="11" start "" https://neal.fun/ 
+if "%c%"=="12" start "" https://humanbenchmark.com/ 
+if "%c%"=="13" start "" https://www.hi2future.com/ 
+if "%c%"=="14" start "" https://radio.garden/ 
+if "%c%"=="15" start "" https://earth.nullschool.net/zh-cn/ 
+if "%c%"=="16" start "" https://www.flightradar24.com/ 
+if "%c%"=="17" start "" http://www.staggeringbeauty.com/ 
+if "%c%"=="18" start "" https://suulnnka.github.io/BullshitGenerator/index.html 
+if "%c%"=="19" start "" https://lab.magiconch.com/nbnhhsh/ 
+if "%c%"=="20" start "" https://www.autopiano.cn/ 
+if "%c%"=="21" start "" https://poki.com/zh 
+if "%c%"=="22" start "" https://bongo.cat/ 
+if "%c%"=="23" start "" https://www.allhistory.com/ 
+if "%c%"=="24" start "" http://weavesilk.com/ 
+if "%c%"=="25" start "" https://wiki.archiveteam.org/ 
+if "%c%"=="26" start "" https://zhongguoyuyan.cn 
+if "%c%"=="27" start "" https://zoomquilt.org/ 
+if "%c%"=="28" start "" http://endless.horse/ 
+if "%c%"=="29" start "" https://asoftmurmur.com/ 
+if "%c%"=="30" start "" https://scaleofuniverse.com/zh 
+if "%c%"=="31" start "" https://www.planecrashinfo.com/ 
+if "%c%"=="32" start "" https://www.yikm.net/ 
+if "%c%"=="33" start "" https://oneminutepark.tv/
+if "%c%"=="34" start "" https://tuxun.fun/
+if "%c%"=="35" start "" http://yume.ly/
+if "%c%"=="36" start "" https://www.guessthepin.com/
+if "%c%"=="37" start "" https://www.arealme.com/cn
+if "%c%"=="0" endlocal & exit /b
+if /i "%c%"=="q" endlocal & exit /b
 goto :hahaha
 
 :: 检查脚本更新 
@@ -1484,7 +1556,7 @@ setlocal
 set "msg=%~1" & set "sec=%~2" & set "silent=%~3"
 if not defined msg set "msg=请稍候..." 
 if not defined sec set "sec=1"
-echo.%msg%
+if not "%msg%"=="" if not "%msg%"==" " echo %msg%
 if /i "%silent%"=="silent" (
     timeout /t %sec% >nul
 ) else (
