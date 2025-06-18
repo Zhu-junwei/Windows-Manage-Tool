@@ -4,8 +4,8 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250613" 
-set "rversion=v2.1.1"
+set "updated=20250618" 
+set "rversion=v2.1.2"
 title %title% %rversion%
 :: 主菜单 
 :main_menu 
@@ -81,26 +81,27 @@ if "%submenu_option%"=="1" (
 	call :delete_SuperMenu
 	call :sleep "超级菜单已删除" 5
 ) else if "%submenu_option%"=="5" ( 
-    reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash" /v "MUIVerb" /t REG_SZ /d "Hash" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash" /v "SubCommands" /t REG_SZ /d "" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\01SHA1" /v "MUIVerb" /t REG_SZ /d "SHA1" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\01SHA1\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm SHA1 | format-list" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\02SHA256" /v "MUIVerb" /t REG_SZ /d "SHA256" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\02SHA256\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm SHA256 | format-list" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\03SHA384" /v "MUIVerb" /t REG_SZ /d "SHA384" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\03SHA384\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm SHA384 | format-list" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\04SHA512" /v "MUIVerb" /t REG_SZ /d "SHA512" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\04SHA512\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm SHA512 | format-list" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\05MACTripleDES" /v "MUIVerb" /t REG_SZ /d "MACTripleDES" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\05MACTripleDES\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm MACTripleDES | format-list" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\06MD5" /v "MUIVerb" /t REG_SZ /d "MD5" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\06MD5\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm MD5 | format-list" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\07RIPEMD160" /v "MUIVerb" /t REG_SZ /d "RIPEMD160" /f >nul 2>&1
-	reg add "HKEY_CLASSES_ROOT\*\shell\GetFileHash\shell\07RIPEMD160\command" /ve /t REG_SZ /d "powershell.exe -noexit get-filehash -literalpath \"%%1\" -algorithm RIPEMD160 | format-list" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash" /v "MUIVerb" /t REG_SZ /d "Hash" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash" /v "Icon" /t REG_SZ /d "shell32.dll,-42" /f>nul 2>&1 
+	reg add "HKCR\*\shell\GetFileHash" /v "SubCommands" /t REG_SZ /d "" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\01SHA1" /v "MUIVerb" /t REG_SZ /d "SHA1" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\01SHA1\command" /ve /t REG_SZ /d "powershell -noexit -command \"get-filehash -literalpath '%%1' -algorithm SHA1 ^| format-list\"" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\02SHA256" /v "MUIVerb" /t REG_SZ /d "SHA256" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\02SHA256\command" /ve /t REG_SZ /d "powershell -noexit -command \"get-filehash -literalpath '%%1' -algorithm SHA256 ^| format-list\"" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\03SHA384" /v "MUIVerb" /t REG_SZ /d "SHA384" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\03SHA384\command" /ve /t REG_SZ /d "powershell -noexit -command \"get-filehash -literalpath '%%1' -algorithm SHA384 ^| format-list\"" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\04SHA512" /v "MUIVerb" /t REG_SZ /d "SHA512" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\04SHA512\command" /ve /t REG_SZ /d "powershell -noexit -command \"get-filehash -literalpath '%%1' -algorithm SHA512 ^| format-list\"" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\05MACTripleDES" /v "MUIVerb" /t REG_SZ /d "MACTripleDES" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\05MACTripleDES\command" /ve /t REG_SZ /d "powershell -noexit -command \"get-filehash -literalpath '%%1' -algorithm MACTripleDES ^| format-list\"" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\06MD5" /v "MUIVerb" /t REG_SZ /d "MD5" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\06MD5\command" /ve /t REG_SZ /d "powershell -noexit -command \"get-filehash -literalpath '%%1' -algorithm MD5 ^| format-list\"" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\07RIPEMD160" /v "MUIVerb" /t REG_SZ /d "RIPEMD160" /f >nul 2>&1
+	reg add "HKCR\*\shell\GetFileHash\shell\07RIPEMD160\command" /ve /t REG_SZ /d "powershell -noexit -command \"get-filehash -literalpath '%%1' -algorithm RIPEMD160 ^| format-list\"" /f >nul 2>&1
 	call :sleep "添加Hash右键菜单完成!" 3
 )  else if "%submenu_option%"=="6" ( 
 	echo 正在删除Hash右键菜单...
-	reg delete "HKEY_CLASSES_ROOT\*\shell\GetFileHash" /f >nul 2>&1
+	reg delete "HKCR\*\shell\GetFileHash" /f >nul 2>&1
 	call :sleep "Hash右键菜单已删除!" 3
 )
 if "%submenu_option%"=="0" exit /b
@@ -273,26 +274,26 @@ echo.
 set /p submenu_option=请输入你的选择: 
 if "%submenu_option%"=="1" (
 	echo 正在隐藏桌面图标小箭头...
-	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons" /v 29 /d "%systemroot%\system32\imageres.dll,197" /t reg_sz /f >nul 2>&1
+	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons" /v 29 /d "%systemroot%\system32\imageres.dll,197" /t reg_sz /f >nul 2>&1
 	attrib -s -r -h "%userprofile%\AppData\Local\iconcache.db" >nul 2>&1
 	del "%userprofile%\AppData\Local\iconcache.db" /f /q >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="2" (
 	echo 正在显示桌面图标小箭头...
-	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons" /v 29 /f >nul 2>&1
+	reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons" /v 29 /f >nul 2>&1
 	attrib -s -r -h "%userprofile%\AppData\Local\iconcache.db" >nul 2>&1
 	del "%userprofile%\AppData\Local\iconcache.db" /f /q >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="3" (
 	echo 正在隐藏了解此图片...
-	REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}" /t REG_DWORD /d 1 /f >nul 2>&1
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}" /t REG_DWORD /d 1 /f >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="4" (
 	echo 正在显示了解此图片...
-	REG DELETE "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}" /f >nul 2>&1
+	REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}" /f >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
 ) else if "%submenu_option%"=="5" (
@@ -547,7 +548,7 @@ if "%value%"=="1" (
 ) else if "%value%"=="0" (
     echo 设置任务栏时间隐藏秒 
 )
-reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowSecondsInSystemClock" /t REG_DWORD /d %value% /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "ShowSecondsInSystemClock" /t REG_DWORD /d %value% /f >nul 2>&1
 exit /b
 
 :: 资源管理器设置 
@@ -570,17 +571,17 @@ call :print_separator
 echo. 
 set /p submenu_option=请输入你的选择: 
 if "%submenu_option%"=="1" (
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "LaunchTo" /t REG_DWORD /d 1 /f >nul 2>&1
+	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "LaunchTo" /t REG_DWORD /d 1 /f >nul 2>&1
 	call :sleep "已设置默认打开此电脑！" 5
 ) else if "%submenu_option%"=="2" (
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "LaunchTo" /t REG_DWORD /d 0 /f >nul 2>&1
+	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "LaunchTo" /t REG_DWORD /d 0 /f >nul 2>&1
 	call :sleep "已设置默认打开主文件夹！" 5
 ) else if "%submenu_option%"=="3" (
-	REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
 	call :restart_explorer
 	call :sleep "已显示扩展名" 6
 ) else if "%submenu_option%"=="4" (
-	REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 1 /f
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 1 /f
 	call :restart_explorer
 	call :sleep "已隐藏扩展名" 6
 ) else if "%submenu_option%"=="5" (
@@ -593,10 +594,10 @@ if "%submenu_option%"=="1" (
 	call :restart_explorer
 	call :sleep "已设置双击打开文件！" 3
 ) else if "%submenu_option%"=="7" (
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "AutoCheckSelect" /t REG_DWORD /d 1 /f >nul 2>&1
+	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "AutoCheckSelect" /t REG_DWORD /d 1 /f >nul 2>&1
 	call :sleep "已显示复选框，手动刷新生效" 6
 ) else if "%submenu_option%"=="8" (
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "AutoCheckSelect" /t REG_DWORD /d 0 /f >nul 2>&1
+	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "AutoCheckSelect" /t REG_DWORD /d 0 /f >nul 2>&1
 	call :sleep "已隐藏复选框，手动刷新生效" 6
 ) else if "%submenu_option%"=="9" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f
@@ -806,54 +807,54 @@ if "%submenu_option%"=="1" (
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "UseWUServer" /t REG_DWORD /d "0x1" /f  >nul 2>&1
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "WUServer" /t REG_SZ /d "http://127.0.0.1" /f  >nul 2>&1
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "WUStatusServer" /t REG_SZ /d "http://127.0.0.1" /f  >nul 2>&1
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoWindowsUpdate" /t REG_DWORD /d "0x1" /f  >nul 2>&1
+	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoWindowsUpdate" /t REG_DWORD /d "0x1" /f  >nul 2>&1
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoUpdate" /t REG_DWORD /d "0x1" /f  >nul 2>&1
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "AutoInstallMinorUpdates" /t REG_DWORD /d "0x1" /f >nul 2>&1
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "DetectionFrequencyEnabled" /t REG_DWORD /d "0x0" /f >nul 2>&1
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "RescheduleWaitTimeEnabled" /t REG_DWORD /d "0x0" /f >nul 2>&1
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\WindowsUpdate" /v "DisableWindowsUpdateAccess" /t REG_DWORD /d "0x1" /f >nul 2>&1
+	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\WindowsUpdate" /v "DisableWindowsUpdateAccess" /t REG_DWORD /d "0x1" /f >nul 2>&1
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "RescheduleWaitTimeEnabled" /t REG_DWORD /d "0x1" /f >nul 2>&1
-	reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\WAU" /v "Disabled" /t REG_DWORD /d "0x1" /f >nul 2>&1
-	REG add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "DisableOSUpgrade" /t REG_DWORD /d 1 /f >nul 2>&1
-	REG add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start" /t REG_DWORD /d 4 /f >nul 2>&1
-	REG add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\UsoSvc" /v "Start" /t REG_DWORD /d 4 /f >nul 2>&1
+	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\WAU" /v "Disabled" /t REG_DWORD /d "0x1" /f >nul 2>&1
+	REG add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "DisableOSUpgrade" /t REG_DWORD /d 1 /f >nul 2>&1
+	REG add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start" /t REG_DWORD /d 4 /f >nul 2>&1
+	REG add "HKLM\SYSTEM\CurrentControlSet\Services\UsoSvc" /v "Start" /t REG_DWORD /d 4 /f >nul 2>&1
 	REG add "HKLM\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\OSUpgrade" /v "ReservationsAllowed" /t REG_DWORD /d 0 /f >nul 2>&1
-	REG add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Gwx" /v "DisableGwx" /t REG_DWORD /d 1 /f >nul 2>&1
-	REG add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\EOSNotify" /v "DiscontinueEOS" /t REG_DWORD /d 1 /f >nul 2>&1
+	REG add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Gwx" /v "DisableGwx" /t REG_DWORD /d 1 /f >nul 2>&1
+	REG add "HKCU\Software\Microsoft\Windows\CurrentVersion\EOSNotify" /v "DiscontinueEOS" /t REG_DWORD /d 1 /f >nul 2>&1
 	net start wuauserv
 	call :sleep "系统已禁止更新" 5
 ) else if "%submenu_option%"=="2" (
 	echo 正在开启系统更新...
     net stop wuauserv
-	REG delete "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start"  /f >nul 2>&1
-	REG delete "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\UsoSvc" /v "Start"  /f >nul 2>&1
-	REG add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\UsoSvc" /v "Start" /t REG_DWORD /d 2 /f >nul 2>&1
+	REG delete "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start"  /f >nul 2>&1
+	REG delete "HKLM\SYSTEM\CurrentControlSet\Services\UsoSvc" /v "Start"  /f >nul 2>&1
+	REG add "HKLM\SYSTEM\CurrentControlSet\Services\UsoSvc" /v "Start" /t REG_DWORD /d 2 /f >nul 2>&1
 	REG delete "HKLM\Software\Microsoft\Windows\CurrentVersion\WindowsUpdate\OSUpgrade" /v "ReservationsAllowed" /f >nul 2>&1
-	REG delete "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Gwx" /v "DisableGwx"  /f >nul 2>&1
-	REG delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\EOSNotify" /v "DiscontinueEOS" /f >nul 2>&1
+	REG delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\Gwx" /v "DisableGwx"  /f >nul 2>&1
+	REG delete "HKCU\Software\Microsoft\Windows\CurrentVersion\EOSNotify" /v "DiscontinueEOS" /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "PauseDeferrals" /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "ElevateNonAdmins" /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "UseWUServer" /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "WUServer"  /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "WUStatusServer" /f >nul 2>&1
-	reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoWindowsUpdate" /f >nul 2>&1
+	reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "NoWindowsUpdate" /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoUpdate" /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "AutoInstallMinorUpdates" /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "DetectionFrequencyEnabled" /f >nul 2>&1
-	reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\WindowsUpdate" /v "DisableWindowsUpdateAccess" /f >nul 2>&1
+	reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\WindowsUpdate" /v "DisableWindowsUpdateAccess" /f >nul 2>&1
 	reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "RescheduleWaitTimeEnabled" /f >nul 2>&1
-	reg delete "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\WAU" /v "Disabled" /f >nul 2>&1
-	REG delete "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "DisableOSUpgrade"  /f >nul 2>&1
+	reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\WAU" /v "Disabled" /f >nul 2>&1
+	REG delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "DisableOSUpgrade"  /f >nul 2>&1
 	net start wuauserv
 	call :sleep "系统已开启更新" 5
 ) else if "%submenu_option%"=="3" (
 	echo 暂停更新1000周...
-	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 7000 /f >nul 2>&1
+	reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 7000 /f >nul 2>&1
 	start ms-settings:windowsupdate
 	call :sleep "请手动选择暂停更新周期" 5
 ) else if "%submenu_option%"=="4" (
 	echo 恢复默认暂停更新5周...
-	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 35 /f >nul 2>&1
+	reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 35 /f >nul 2>&1
 	start ms-settings:windowsupdate
 	call :sleep "请手动选择暂停更新周期" 5
 )
@@ -1100,8 +1101,8 @@ rd /s /q "%UserProfile%\OneDrive" >nul 2>&1
 rd /s /q "%LocalAppData%\Microsoft\OneDrive" >nul 2>&1
 rd /s /q "%ProgramData%\Microsoft OneDrive" >nul 2>&1
 rd /s /q "%SystemDrive%\OneDriveTemp" >nul 2>&1
-reg delete "HKEY_CLASSES_ROOT\WOW6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >nul 2>&1
-reg delete "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >nul 2>&1
+reg delete "HKCR\WOW6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >nul 2>&1
+reg delete "HKCR\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >nul 2>&1
 exit /b
 
 :: 安装OneDrive
@@ -1122,6 +1123,7 @@ start "" notepad "%SystemRoot%\system32\drivers\etc\hosts"
 exit /b
 
 :network_setting
+setlocal enabledelayedexpansion
 call :print_title "网络管理" 26
 set "submenu_option="
 call :print_separator
@@ -1183,10 +1185,11 @@ if "%submenu_option%"=="1" (
 	call :sleep "远程桌面设置成功" 5
 ) else if "%submenu_option%"=="12" (
 	call :internet_control
-	call :sleep "已设置网络状态！" 5
+	if "!errorlevel!"=="1" (set "net_status=断网") else (set "net_status=联网")
+	call :sleep "已设置!net_status!！" 5
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%submenu_option%"=="0" endlocal & exit /b
+if /i "%submenu_option%"=="q" endlocal &  exit /b
 goto :network_setting 
 
 :search_port
@@ -1247,7 +1250,7 @@ exit /b
 setlocal
 choice /c 12 /n /m "远程桌面设置? [1.启用 2.关闭]: "
 if "%errorlevel%"=="1" (set "value=0") else ( set "value=1")
-reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d %value% /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d %value% /f
 endlocal & exit /b
 
 :: 一键联网控制 
@@ -1255,13 +1258,15 @@ endlocal & exit /b
 choice /c 12 /n /m "一键联网控制? [1.断网 2.联网]: "
 if "%errorlevel%"=="1" (
 	powershell -Command "$ProgressPreference = 'SilentlyContinue';Get-NetAdapter | Disable-NetAdapter -Confirm:$false"
+	exit /b 1
 ) else (
 	powershell -Command "$ProgressPreference = 'SilentlyContinue';Get-NetAdapter | Enable-NetAdapter -Confirm:$false"
+	exit /b 2
 )
-exit /b
 
 :: 设备管理 
 :device_setting
+setlocal enabledelayedexpansion
 call :print_title "设备管理" 25
 set "device="
 call :print_separator
@@ -1275,33 +1280,28 @@ call :print_separator
 echo.
 set /p "c=请选择你要管理的设备: "
 if not defined c goto :device_setting
-if "%c%"=="0" exit /b
-if /i "%c%"=="q" exit /b
-call :ask_confirm "选择你的操作? [1.禁用(默认)/2.启用]:" 1
-if errorlevel 1 (set "opt=Enable") else (set "opt=Disable")
+if "%c%"=="0" endlocal & exit /b
+if /i "%c%"=="q" endlocal & exit /b
+choice /c 12 /n /m "选择你的操作? [1.禁用 2.启用]: "
+if "%errorlevel%"=="1" (set "opt=Disable" & set "opt_cn=禁用") else (set "opt=Enable" & set "opt_cn=启用")
 if "%c%"=="1" (
 	call :toggle_device_status "Camera" %opt%
-	echo %errorlevel%
 	call :toggle_device_status "Image" %opt%
-	echo %errorlevel%
-	call :sleep "已%opt%照相机" 5
+	set "device_name=照相机"
 )else if "%c%"=="2" (
 	call :toggle_device_status "Bluetooth" %opt%
-	echo %errorlevel%
-	call :sleep "已%opt%蓝牙" 5
+	set "device_name=蓝牙"
 )
+if defined device_name call :sleep "已%opt_cn%%device_name%" 5
 goto :device_setting
 
 :: 设备状态切换
 :: 参数1：设备，如Camera
 :: 参数2：操作，如Disable、Enable 
 :toggle_device_status
-setlocal 
 set "device=%~1" & set "%opt%=%~2"
-echo %device% %opt%
 powershell.exe -nologo -noprofile -Command "$ProgressPreference = 'SilentlyContinue';Get-PnpDevice -Class %device% | %opt%-PnpDevice -Confirm:$false" >nul 2>&1
-set ret=%errorlevel%
-endlocal & exit /b ret
+exit /b
 
 
 :: 微软拼音输入法设置 
@@ -1345,12 +1345,12 @@ goto :microsoft_pinyin
 
 :: 双拼输入法 0软微双拼 1智能ABC 3自然码 
 :microsoft_pinyin_sp
-reg add "HKEY_CURRENT_USER\Software\Microsoft\InputMethod\Settings\CHS" /v DoublePinyinScheme /t REG_DWORD /d %~1 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\InputMethod\Settings\CHS" /v DoublePinyinScheme /t REG_DWORD /d %~1 /f >nul 2>&1
 exit /b
 
 :: 输入法 1双拼 0全拼
 :microsoft_pinyin_select
-reg add "HKEY_CURRENT_USER\Software\Microsoft\InputMethod\Settings\CHS" /v "Enable Double Pinyin" /t REG_DWORD /d %~1 /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\InputMethod\Settings\CHS" /v "Enable Double Pinyin" /t REG_DWORD /d %~1 /f >nul 2>&1
 exit /b
 
 :: 图一乐 
