@@ -1303,7 +1303,6 @@ set "device=%~1" & set "%opt%=%~2"
 powershell.exe -nologo -noprofile -Command "$ProgressPreference = 'SilentlyContinue';Get-PnpDevice -Class %device% | %opt%-PnpDevice -Confirm:$false" >nul 2>&1
 exit /b
 
-
 :: 微软拼音输入法设置 
 :microsoft_pinyin
 setlocal enabledelayedexpansion
@@ -1427,7 +1426,7 @@ call :print_title "检查更新" 35
 call :print_separator "*" 80
 set "jsonUrl=https://files.cnblogs.com/files/zjw-blog/config.json"
 set "BAT_NEW_TMP=%TEMP%\wmtool.tmp"
-set "UPDATE_SCRIPT=%TEMP%\_wmtool_update.bat"
+set "UPDATE_SCRIPT=%TEMP%\wmtool_update.bat"
 echo.
 for /f "usebackq tokens=1,* delims==" %%A in (`
     powershell -NoLogo -Command ^
@@ -1466,16 +1465,20 @@ if not exist "%BAT_NEW_TMP%" (
 	exit /b
 )
 set "MAIN_SCRIPT_PATH=%~f0"
-echo @echo off> "%UPDATE_SCRIPT%"
-echo chcp 65001^>nul >> "%UPDATE_SCRIPT%"
-echo echo 正在更新脚本，请稍候... >> "%UPDATE_SCRIPT%"
-echo copy /Y "%BAT_NEW_TMP%" "%MAIN_SCRIPT_PATH%" >> "%UPDATE_SCRIPT%"
-echo echo 更新完成，正在重新启动... >> "%UPDATE_SCRIPT%"
-echo del "%BAT_NEW_TMP%" ^>nul 2^>nul >> "%UPDATE_SCRIPT%"
-echo start "" "%MAIN_SCRIPT_PATH%" >> "%UPDATE_SCRIPT%"
-echo exit >> "%UPDATE_SCRIPT%"
-start "" "%UPDATE_SCRIPT%"
-exit
+:: 创建更新脚本 
+(
+    echo @echo off
+    echo chcp 65001^>nul
+    echo echo 正在更新脚本，请稍候... 
+    echo copy /Y "%BAT_NEW_TMP%" "%MAIN_SCRIPT_PATH%"
+    echo del /F /Q "%BAT_NEW_TMP%"
+    echo start "" "%MAIN_SCRIPT_PATH%"
+    echo ping 127.0.0.1 -n 2 ^>nul
+    echo del /F /Q "%%~f0" ^>nul 2^>nul
+    echo exit
+) > "%UPDATE_SCRIPT%"
+:: 启动更新脚本并退出当前实例
+start "" /B cmd /c call "%UPDATE_SCRIPT%" & exit
 
 :: 关于
 :about_me
