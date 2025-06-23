@@ -4,7 +4,7 @@
 :: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
 color 0A & chcp 65001
 set "title=Windows管理小工具" 
-set "updated=20250618" 
+set "updated=20250623" 
 set "rversion=v2.1.2"
 title %title% %rversion%
 :: 主菜单 
