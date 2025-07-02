@@ -1,86 +1,91 @@
-@echo off & setlocal EnableDelayedExpansion
+@echo off & setlocal EnableDelayedExpansion & chcp 65001>nul
+
 :: 获取管理员权限
 %1 mshta vbscript:CreateObject("Shell.Application").ShellExecute("cmd.exe","/c %~s0 ::","","runas",1)(window.close)&&exit cd /d "%~dp0"
-:: 背景，代码页和字体颜色，窗口大小（窗口大小在win11中有些不适用）
-color 0A & chcp 65001
-set "title=Windows管理小工具" 
-set "updated=20250623" 
-set "rversion=v2.1.2"
+
+:: 一些配置参数 
+set "color=0A"
+set "title=Windows管理小工具"
+set "updated=20250702"
+set "rversion=v2.1.3"
+set "cols=100"
+set "lines=40"
+set "separator=="
 title %title% %rversion%
+color %color%
+
 :: 主菜单 
 :main_menu 
-mode con cols=60 lines=25
-call :print_title "%title%" 
+mode con cols=%cols% lines=%lines%
+call :print_title "%title%"
 set "main_option="
 call :print_separator
-echo   1. 右键菜单设置                  11. WIFI密码 
-echo   2. 桌面设置                      12. 电源管理 
-echo   3. 任务栏设置                    13. 预装应用管理 
-echo   4. 资源管理器设置                14. 编辑hosts 
-echo   5. 下载 Office                   15. 网络管理 
-echo   6. 下载 Windows                  16. 设备管理 
-echo   7. 激活 Windows ^& Office         17. 微软拼音输入法 
-echo   8. Windows更新设置               18. 图一乐 
-echo   9. UAC（用户账户控制）设置 
-echo  10. 上帝模式                      99. 检查更新 
-echo   0. 退出(q)                       00. 关于 
+echo			1. 右键菜单设置                  11. WIFI密码 &echo.
+echo			2. 桌面设置                      12. 电源管理 &echo.
+echo			3. 任务栏设置                    13. 预装应用管理 &echo.
+echo			4. 资源管理器设置                14. 编辑hosts &echo.
+echo			5. 下载 Office                   15. 网络管理 &echo.
+echo			6. 下载 Windows                  16. 设备管理 &echo.
+echo			7. 激活 Windows ^& Office         17. 微软拼音输入法 &echo.
+echo			8. Windows更新设置               18. 图一乐 &echo.
+echo			9. UAC（用户账户控制）设置 &echo.
+echo			10. 上帝模式                     &echo.
+echo			0. 退出(q)                       00. 关于               99. 检查更新&echo.
 call :print_separator
-echo. 
-set /p main_option=请输入你的选择: 
-if "%main_option%"=="1"  call :submenu_right_click
-if "%main_option%"=="2"  call :desktop
-if "%main_option%"=="3"  call :taskbar
-if "%main_option%"=="4"  call :explorer_setting
-if "%main_option%"=="5"  call :download_office
-if "%main_option%"=="6"  call :download_windows
-if "%main_option%"=="7"  call :activate_windows
-if "%main_option%"=="8"  call :windows_update
-if "%main_option%"=="9"  call :uac_setting
-if "%main_option%"=="10" call :god_mod
-if "%main_option%"=="11" call :wifi_password
-if "%main_option%"=="12" call :power_setting
-if "%main_option%"=="13" call :pre_installed_app
-if "%main_option%"=="14" call :hosts_editor
-if "%main_option%"=="15" call :network_setting
-if "%main_option%"=="16" call :device_setting
-if "%main_option%"=="17" call :microsoft_pinyin
-if "%main_option%"=="18" call :hahaha
-if "%main_option%"=="99" call :update_script
-if "%main_option%"=="00" call :about_me
-if "%main_option%"=="0"  goto byebye
-if /i "%main_option%"=="q" goto byebye
+set /p c=请输入你的选择: 
+if "%c%"=="1"  call :submenu_right_click
+if "%c%"=="2"  call :desktop
+if "%c%"=="3"  call :taskbar
+if "%c%"=="4"  call :explorer_setting
+if "%c%"=="5"  call :download_office
+if "%c%"=="6"  call :download_windows
+if "%c%"=="7"  call :activate_windows
+if "%c%"=="8"  call :windows_update
+if "%c%"=="9"  call :uac_setting
+if "%c%"=="10" call :god_mod
+if "%c%"=="11" call :wifi_password
+if "%c%"=="12" call :power_setting
+if "%c%"=="13" call :pre_installed_app
+if "%c%"=="14" call :hosts_editor
+if "%c%"=="15" call :network_setting
+if "%c%"=="16" call :device_setting
+if "%c%"=="17" call :microsoft_pinyin
+if "%c%"=="18" call :hahaha
+if "%c%"=="99" call :update_script
+if "%c%"=="00" call :about_me
+if "%c%"=="0"  goto byebye
+if /i "%c%"=="q" goto byebye
 goto main_menu 
 
 :: 右键菜单设置子菜单 
 :submenu_right_click
-call :print_title "右键菜单设置" 24 
-set "submenu_option="
+call :print_title "右键菜单设置"
+set "a="
 call :print_separator
-echo  1. 切换 Windows 10 右键菜单
-echo  2. 恢复 Windows 11 右键菜单
-echo  3. 添加超级菜单
-echo  4. 删除超级菜单
-echo  5. 添加Hash右键菜单
-echo  6. 删除Hash右键菜单
-echo  0. 返回(q) 
+echo				1. 切换 Windows 10 右键菜单 & echo.
+echo				2. 恢复 Windows 11 右键菜单 & echo.
+echo				3. 添加超级菜单 & echo.
+echo				4. 删除超级菜单 & echo.
+echo				5. 添加Hash右键菜单 & echo.
+echo				6. 删除Hash右键菜单 & echo.
+echo				0. 返回(q)  & echo.
 call :print_separator
-echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" ( 
+set /p a=请输入你的选择: 
+if "%a%"=="1" ( 
     reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve >nul 2>&1
     call :restart_explorer
-) else if "%submenu_option%"=="2" ( 
+) else if "%a%"=="2" ( 
     reg delete "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" /f  >nul 2>&1
     call :restart_explorer
-) else if "%submenu_option%"=="3" (
+) else if "%a%"=="3" (
 	echo 添加超级菜单...
 	call :add_SuperMenu
 	call :sleep "添加超级菜单成功!" 5
-) else if "%submenu_option%"=="4" ( 
+) else if "%a%"=="4" ( 
 	echo 删除超级菜单...
 	call :delete_SuperMenu
 	call :sleep "超级菜单已删除" 5
-) else if "%submenu_option%"=="5" ( 
+) else if "%a%"=="5" ( 
 	reg add "HKCR\*\shell\GetFileHash" /v "MUIVerb" /t REG_SZ /d "Hash" /f >nul 2>&1
 	reg add "HKCR\*\shell\GetFileHash" /v "Icon" /t REG_SZ /d "shell32.dll,-42" /f>nul 2>&1 
 	reg add "HKCR\*\shell\GetFileHash" /v "SubCommands" /t REG_SZ /d "" /f >nul 2>&1
@@ -99,13 +104,13 @@ if "%submenu_option%"=="1" (
 	reg add "HKCR\*\shell\GetFileHash\shell\07RIPEMD160" /v "MUIVerb" /t REG_SZ /d "RIPEMD160" /f >nul 2>&1
 	reg add "HKCR\*\shell\GetFileHash\shell\07RIPEMD160\command" /ve /t REG_SZ /d "powershell -noexit -command \"get-filehash -literalpath '%%1' -algorithm RIPEMD160 ^| format-list\"" /f >nul 2>&1
 	call :sleep "添加Hash右键菜单完成!" 3
-)  else if "%submenu_option%"=="6" ( 
+)  else if "%a%"=="6" ( 
 	echo 正在删除Hash右键菜单...
 	reg delete "HKCR\*\shell\GetFileHash" /f >nul 2>&1
 	call :sleep "Hash右键菜单已删除!" 3
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto submenu_right_click
 
 :: 添加超级菜单，后面看看怎么使用reg文件进行处理
@@ -255,71 +260,70 @@ goto submenu_right_click
 
 :: 桌面设置
 :desktop
-call :print_title "桌面设置" 26 
-set "submenu_option="
+call :print_title "桌面设置" 
+set "a="
 call :print_separator
-echo  1. 隐藏桌面图标小箭头 
-echo  2. 显示桌面图标小箭头 
-echo  3. 隐藏了解此图片（windows聚焦） 
-echo  4. 显示了解此图片（windows聚焦） 
-echo  5. 打开桌面图标设置 
-echo  6. 添加网络连接 
-echo  7. 添加IE快捷方式
-echo  8. 显示windows版本水印 
-echo  9. 隐藏windows版本水印
-echo 10. 设置Bing每日桌面背景
-echo  0. 返回(q) 
+echo				1. 隐藏桌面图标小箭头 & echo.
+echo				2. 显示桌面图标小箭头 & echo.
+echo				3. 隐藏了解此图片（windows聚焦） & echo.
+echo				4. 显示了解此图片（windows聚焦） & echo.
+echo				5. 打开桌面图标设置 & echo.
+echo				6. 添加网络连接 & echo.
+echo				7. 添加IE快捷方式& echo.
+echo				8. 显示windows版本水印 & echo.
+echo				9. 隐藏windows版本水印& echo.
+echo				10. 设置Bing每日桌面背景& echo.
+echo				0. 返回(q) & echo.
 call :print_separator
-echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
+set /p a=请输入你的选择: 
+if "%a%"=="1" (
 	echo 正在隐藏桌面图标小箭头...
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons" /v 29 /d "%systemroot%\system32\imageres.dll,197" /t reg_sz /f >nul 2>&1
 	attrib -s -r -h "%userprofile%\AppData\Local\iconcache.db" >nul 2>&1
 	del "%userprofile%\AppData\Local\iconcache.db" /f /q >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="2" (
+) else if "%a%"=="2" (
 	echo 正在显示桌面图标小箭头...
 	reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons" /v 29 /f >nul 2>&1
 	attrib -s -r -h "%userprofile%\AppData\Local\iconcache.db" >nul 2>&1
 	del "%userprofile%\AppData\Local\iconcache.db" /f /q >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="3" (
+) else if "%a%"=="3" (
 	echo 正在隐藏了解此图片...
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}" /t REG_DWORD /d 1 /f >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="4" (
+) else if "%a%"=="4" (
 	echo 正在显示了解此图片...
 	REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel" /v "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}" /f >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="5" (
+) else if "%a%"=="5" (
 	rundll32 shell32.dll,Control_RunDLL desk.cpl,,0
-)else if "%submenu_option%"=="6" (
+)else if "%a%"=="6" (
 	call :desktop_add_network
 	call :sleep "网络连接已添加！" 3
-)else if "%submenu_option%"=="7" (
+)else if "%a%"=="7" (
 	call :desktop_add_ie
 	set "add_result=快捷方式创建成功！"
 	if %ERRORLEVEL% equ 1 set "add_result=快捷方式创建失败！"
 	echo %add_result%！& timeout /t 3
-)else if "%submenu_option%"=="8" (
+)else if "%a%"=="8" (
 	REG ADD "HKCU\Control Panel\Desktop" /V PaintDesktopVersion /T REG_DWORD /D 1 /F >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
-)else if "%submenu_option%"=="9" (
+)else if "%a%"=="9" (
 	REG ADD "HKCU\Control Panel\Desktop" /V PaintDesktopVersion /T REG_DWORD /D 0 /F >nul 2>&1
 	call :restart_explorer
 	call :sleep "操作完成！" 2
-)else if "%submenu_option%"=="10" (
+)else if "%a%"=="10" (
 	call :set_desktop_background
 	call :sleep "10秒后自动返回..." 10
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto desktop
 
 :: 桌面添加网络连接
@@ -385,79 +389,77 @@ endlocal & exit /b
 
 :: 任务栏设置 
 :taskbar 
-mode con cols=70 lines=30
-color 0A
-call :print_title "任务栏设置" 30 
-set "submenu_option=" 
-call :print_separator "*" 70
-echo   1. 一键净化任务栏                     11. 自动隐藏任务栏 — 开启 
-echo   2. 禁用小组件                         12. 自动隐藏任务栏 — 关闭 
-echo   3. 启用小组件                         13. 时间显示秒 
-echo   4. 卸载小组件                         14. 时间隐藏秒（默认） 
-echo   5. 安装小组件 
-echo   6. 任务视图 — 隐藏 
-echo   7. 任务视图 — 显示 
-echo   8. 搜索 - 隐藏 
-echo   9. 搜索 - 仅显示搜索图标 
-echo  10. 清除固定（Edge、商店、资源管理器） 
-echo   0. 返回(q) 
-call :print_separator "*" 70
-echo. 
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
+::color 0A
+call :print_title "任务栏设置"
+set "a=" 
+call :print_separator
+echo			1. 一键净化任务栏                     11. 自动隐藏任务栏 — 开启 &echo.
+echo			2. 禁用小组件                         12. 自动隐藏任务栏 — 关闭 &echo.
+echo			3. 启用小组件                         13. 时间显示秒 &echo.
+echo			4. 卸载小组件                         14. 时间隐藏秒（默认） &echo.
+echo			5. 安装小组件 &echo.
+echo			6. 任务视图 — 隐藏 &echo.
+echo			7. 任务视图 — 显示 &echo.
+echo			8. 搜索 - 隐藏 &echo.
+echo			9. 搜索 - 仅显示搜索图标 &echo.
+echo			10. 清除固定（Edge、商店、资源管理器） &echo.
+echo			0. 返回(q) &echo.
+call :print_separator
+set /p a=请输入你的选择: 
+if "%a%"=="1" (
 	call :hide_taskview
 	call :hide_search
 	call :taskbar_unpin
 	call :widgets_uninstall
 	call :restart_explorer
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="2" (
+) else if "%a%"=="2" (
 	call :widgets_disable
 	call :restart_explorer
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="3" (
+) else if "%a%"=="3" (
 	call :widgets_enable
 	call :restart_explorer
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="4" (
+) else if "%a%"=="4" (
 	call :widgets_uninstall
 	call :restart_explorer
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="5" (
+) else if "%a%"=="5" (
 	call :widgets_install
 	call :restart_explorer
     call :sleep "操作完成！" 2
-)  else if "%submenu_option%"=="6" (
+)  else if "%a%"=="6" (
 	call :hide_taskview
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="7" (
+) else if "%a%"=="7" (
 	call :show_taskview
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="8" (
+) else if "%a%"=="8" (
 	call :hide_search
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="9" (
+) else if "%a%"=="9" (
 	call :search_icon
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="10" (
+) else if "%a%"=="10" (
 	call :taskbar_unpin
 	call :restart_explorer
     echo 操作完成！& timeout /t 2
-) else if "%submenu_option%"=="11" (
+) else if "%a%"=="11" (
 	call :taskbar_auto_hide_on
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="12" (
+) else if "%a%"=="12" (
 	call :taskbar_auto_hide_off
     call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="13" (
+) else if "%a%"=="13" (
 	call :taskbar_time_second 1
 	call :sleep "操作完成！" 2
-) else if "%submenu_option%"=="14" (
+) else if "%a%"=="14" (
 	call :taskbar_time_second 0
 	call :sleep "操作完成！" 2
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto taskbar
 
 :widgets_disable
@@ -553,73 +555,72 @@ exit /b
 
 :: 资源管理器设置 
 :explorer_setting
-call :print_title "资源管理器设置" 24
-set "submenu_option=" 
+call :print_title "资源管理器设置"
+set "a=" 
 call :print_separator
-echo  1. 默认打开 此电脑         11. 禁用 U盘 
-echo  2. 默认打开 主文件夹       12. 启用 U盘 
-echo  3. 显示 扩展(后缀)名       13. Windows 10此电脑文件夹设置
-echo  4. 隐藏 扩展(后缀)名 
-echo  5. 单击 打开文件 
-echo  6. 双击 打开文件 
-echo  7. 显示 复选框 
-echo  8. 隐藏 复选框 
-echo  9. 显示 系统隐藏文件 
-echo 10. 隐藏 系统隐藏文件 
-echo  0. 返回(q) 
+echo			1. 默认打开 此电脑         11. 禁用 U盘 &echo.
+echo			2. 默认打开 主文件夹       12. 启用 U盘 &echo.
+echo			3. 显示 扩展(后缀)名       13. Windows 10此电脑文件夹设置 &echo.
+echo			4. 隐藏 扩展(后缀)名 &echo.
+echo			5. 单击 打开文件 &echo.
+echo			6. 双击 打开文件 &echo.
+echo			7. 显示 复选框 &echo.
+echo			8. 隐藏 复选框 &echo.
+echo			9. 显示 系统隐藏文件 &echo.
+echo			10. 隐藏 系统隐藏文件 &echo.
+echo			0. 返回(q) &echo.
 call :print_separator
-echo. 
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
+set /p a=请输入你的选择: 
+if "%a%"=="1" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "LaunchTo" /t REG_DWORD /d 1 /f >nul 2>&1
 	call :sleep "已设置默认打开此电脑！" 5
-) else if "%submenu_option%"=="2" (
+) else if "%a%"=="2" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "LaunchTo" /t REG_DWORD /d 0 /f >nul 2>&1
 	call :sleep "已设置默认打开主文件夹！" 5
-) else if "%submenu_option%"=="3" (
+) else if "%a%"=="3" (
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
 	call :restart_explorer
 	call :sleep "已显示扩展名" 6
-) else if "%submenu_option%"=="4" (
+) else if "%a%"=="4" (
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 1 /f
 	call :restart_explorer
 	call :sleep "已隐藏扩展名" 6
-) else if "%submenu_option%"=="5" (
+) else if "%a%"=="5" (
 	REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /V IconUnderline /T REG_DWORD /D 2 /F >nul 2>&1
 	REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /V ShellState /T REG_BINARY /D 240000001ea8000000000000000000000000000001000000130000000000000062000000 /F >nul 2>&1
 	call :restart_explorer
 	call :sleep "已设置单击打开文件！" 3
-) else if "%submenu_option%"=="6" (
+) else if "%a%"=="6" (
 	REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /V ShellState /T REG_BINARY /D 240000003ea8000000000000000000000000000001000000130000000000000062000000 /F >nul 2>&1
 	call :restart_explorer
 	call :sleep "已设置双击打开文件！" 3
-) else if "%submenu_option%"=="7" (
+) else if "%a%"=="7" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "AutoCheckSelect" /t REG_DWORD /d 1 /f >nul 2>&1
 	call :sleep "已显示复选框，手动刷新生效" 6
-) else if "%submenu_option%"=="8" (
+) else if "%a%"=="8" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "AutoCheckSelect" /t REG_DWORD /d 0 /f >nul 2>&1
 	call :sleep "已隐藏复选框，手动刷新生效" 6
-) else if "%submenu_option%"=="9" (
+) else if "%a%"=="9" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowSuperHidden /t REG_DWORD /d 1 /f
 	call :restart_explorer
 	call :sleep "已显示系统隐藏文件，正在重启资源管理器" 6
-) else if "%submenu_option%"=="10" (
+) else if "%a%"=="10" (
 	reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 2 /f >nul 2>&1
     reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowSuperHidden /t REG_DWORD /d 0 /f >nul 2>&1
 	call :restart_explorer
 	call :sleep "已隐藏系统隐藏文件，正在重启资源管理器" 6
-) else if "%submenu_option%"=="11" (
+) else if "%a%"=="11" (
 	call :usbstor_setting 4
 	call :sleep "已禁用U盘使用" 6
-) else if "%submenu_option%"=="12" (
+) else if "%a%"=="12" (
 	call :usbstor_setting 3
 	call :sleep "已启用U盘使用" 6
-) else if "%submenu_option%"=="13" (
+) else if "%a%"=="13" (
 	call :this_computer_folder
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto :explorer_setting
 
 :: U盘设置 4:禁用 3:启用
@@ -630,77 +631,77 @@ exit /b
 :: Windows 10 此电脑文件夹管理
 :this_computer_folder
 call :print_title "Windows 10 此电脑文件夹管理"
-set "submenu_option="
+set "a="
 call :print_separator
-echo   1. 隐藏 3D	 		 2. 恢复 3D 
-echo   3. 隐藏 视频			 4. 恢复 视频 
-echo   5. 隐藏 图片			 6. 恢复 图片 
-echo   7. 隐藏 文档			 8. 恢复 文档 
-echo   9. 隐藏 下载			10. 恢复 下载 
-echo  11. 隐藏 音乐			12. 恢复 音乐 
-echo  13. 隐藏 桌面			14. 恢复 桌面 
-echo  15. 隐藏所有选项		16. 开启所有选项 
-echo   0. 返回(q) 
+echo			1. 隐藏 3D	 		 2. 恢复 3D &echo.
+echo			3. 隐藏 视频			 4. 恢复 视频 &echo.
+echo			5. 隐藏 图片			 6. 恢复 图片 &echo.
+echo			7. 隐藏 文档			 8. 恢复 文档 &echo.
+echo			9. 隐藏 下载			10. 恢复 下载 &echo.
+echo			11. 隐藏 音乐			12. 恢复 音乐 &echo.
+echo			13. 隐藏 桌面			14. 恢复 桌面 &echo.
+echo			15. 隐藏所有选项		16. 开启所有选项 &echo.
+echo			0. 返回(q) &echo.
 call :print_separator
 echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
+set /p b=请输入你的选择: 
+if "%b%"=="1" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="2" (
+) else if "%b%"=="2" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="3" (
+) else if "%b%"=="3" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="4" (
+) else if "%b%"=="4" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="5" (
+) else if "%b%"=="5" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="6" (
+) else if "%b%"=="6" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="7" (
+) else if "%b%"=="7" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="8" (
+) else if "%b%"=="8" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="9" (
+) else if "%b%"=="9" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="10" (
+) else if "%b%"=="10" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{0ddd015d-b06c-45d5-8c4c-f59713854639}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="11" (
+) else if "%b%"=="11" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="12" (
+) else if "%b%"=="12" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{a0c69a99-21c8-4671-8703-7934162fcf1d}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="13" (
+) else if "%b%"=="13" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="14" (
+) else if "%b%"=="14" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="15" (
+) else if "%b%"=="15" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
@@ -716,7 +717,7 @@ if "%submenu_option%"=="1" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Hide" /f
 	call :restart_explorer
-) else if "%submenu_option%"=="16" (
+) else if "%b%"=="16" (
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	Reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
@@ -733,49 +734,46 @@ if "%submenu_option%"=="1" (
 	Reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\PropertyBag" /v "ThisPCPolicy" /t REG_SZ /d "Show" /f
 	call :restart_explorer
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%b%"=="0" exit /b
+if /i "%b%"=="q" exit /b
 goto this_computer_folder
 
 :: 下载 Office 
 :download_office
-call :print_title "下载 Office" 25
-set "submenu_option="
+call :print_title "下载 Office"
+set "a="
 call :print_separator
-echo  1. xb21cn 
-echo  2. Office Tool Plus 
-echo  0. 返回(q) 
+echo				1. xb21cn &echo.
+echo				2. Office Tool Plus &echo.
+echo				0. 返回(q) &echo.
 call :print_separator
-echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" start "" https://www.xb21cn.com/
-if "%submenu_option%"=="2" start powershell -NoProfile -ExecutionPolicy Bypass -Command "irm officetool.plus | iex"
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+set /p a=请输入你的选择: 
+if "%a%"=="1" start "" https://www.xb21cn.com/
+if "%a%"=="2" start powershell -NoProfile -ExecutionPolicy Bypass -Command "irm officetool.plus | iex"
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto :download_office
 
 :: 下载 Windows
 :download_windows
-mode con cols=80 lines=25
-call :print_title "下载 Windows" 32
-set "submenu_option="
-call :print_separator * 80
-echo   1. 山己几子木      https://msdn.sjjzm.com/ 
-echo   2. Microsoft官方   https://www.microsoft.com/zh-cn/software-download/ 
-echo   3. NEXT,ITELLYOU   https://next.itellyou.cn/
-echo   4. 不忘初心        https://www.pc528.net/
-echo   5. 吻妻            https://www.newxitong.com/
-echo   0. 返回(q) 
-call :print_separator * 80
-echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" start "" https://msdn.sjjzm.com/ 
-if "%submenu_option%"=="2" start "" https://www.microsoft.com/zh-cn/software-download/ 
-if "%submenu_option%"=="3" start "" https://next.itellyou.cn/
-if "%submenu_option%"=="4" start "" https://www.pc528.net/
-if "%submenu_option%"=="5" start "" https://www.newxitong.com/
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+call :print_title "下载 Windows"
+set "a="
+call :print_separator
+echo			1. 山己几子木      https://msdn.sjjzm.com/ &echo.
+echo			2. Microsoft官方   https://www.microsoft.com/zh-cn/software-download/ &echo.
+echo			3. NEXT,ITELLYOU   https://next.itellyou.cn/ &echo.
+echo			4. 不忘初心        https://www.pc528.net/ &echo.
+echo			5. 吻妻            https://www.newxitong.com/ &echo.
+echo			0. 返回(q) &echo.
+call :print_separator
+set /p a=请输入你的选择: 
+if "%a%"=="1" start "" https://msdn.sjjzm.com/ 
+if "%a%"=="2" start "" https://www.microsoft.com/zh-cn/software-download/ 
+if "%a%"=="3" start "" https://next.itellyou.cn/
+if "%a%"=="4" start "" https://www.pc528.net/
+if "%a%"=="5" start "" https://www.newxitong.com/
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto download_windows
 
 :: 激活 Windows & Office
@@ -787,19 +785,19 @@ exit /b
 :: Windows更新设置
 :windows_update
 call :print_title "Windows更新设置"
-set "submenu_option="
+set "a="
 call :print_separator
-echo  1. 禁用Windows更新 
-echo  2. 启用Windows更新 
-echo  3. 暂停更新1000周*
-echo  4. 暂停更新5周（默认） 
-echo  0. 返回(q) 
+echo			1. 禁用Windows更新 &echo.
+echo			2. 启用Windows更新 &echo.
+echo			3. 暂停更新1000周* &echo.
+echo			4. 暂停更新5周（默认） &echo.
+echo			0. 返回(q) &echo.
 call :print_separator "."
-echo   建议选暂停更新1000周，影响较小。
+echo		建议选暂停更新1000周，影响较小。
 call :print_separator
 echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
+set /p a=请输入你的选择: 
+if "%a%"=="1" (
 	echo 正在禁用系统更新...
 	net stop wuauserv
 	reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "PauseDeferrals" /t REG_DWORD /d "0x1" /f  >nul 2>&1
@@ -823,7 +821,7 @@ if "%submenu_option%"=="1" (
 	REG add "HKCU\Software\Microsoft\Windows\CurrentVersion\EOSNotify" /v "DiscontinueEOS" /t REG_DWORD /d 1 /f >nul 2>&1
 	net start wuauserv
 	call :sleep "系统已禁止更新" 5
-) else if "%submenu_option%"=="2" (
+) else if "%a%"=="2" (
 	echo 正在开启系统更新...
     net stop wuauserv
 	REG delete "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v "Start"  /f >nul 2>&1
@@ -847,58 +845,57 @@ if "%submenu_option%"=="1" (
 	REG delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v "DisableOSUpgrade"  /f >nul 2>&1
 	net start wuauserv
 	call :sleep "系统已开启更新" 5
-) else if "%submenu_option%"=="3" (
+) else if "%a%"=="3" (
 	echo 暂停更新1000周...
 	reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 7000 /f >nul 2>&1
 	start ms-settings:windowsupdate
 	call :sleep "请手动选择暂停更新周期" 5
-) else if "%submenu_option%"=="4" (
+) else if "%a%"=="4" (
 	echo 恢复默认暂停更新5周...
 	reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 35 /f >nul 2>&1
 	start ms-settings:windowsupdate
 	call :sleep "请手动选择暂停更新周期" 5
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto windows_update
 
 :: UAC（用户账户控制）设置 子菜单 
 :uac_setting 
 call :print_title "UAC（用户账户控制）设置"
-set "submenu_option=" 
+set "a=" 
 call :print_separator
-echo  1. 从不通知（静默模式，推荐开发调试） 
-echo  2. 恢复默认（推荐普通用户） 
-echo  3. 彻底关闭（EnableLUA=0，需重启，UWP不可用） 
-echo  0. 返回(q) 
+echo				1. 从不通知（静默模式，推荐开发调试） &echo.
+echo				2. 恢复默认（推荐普通用户） &echo.
+echo				3. 彻底关闭（EnableLUA=0，需重启，UWP不可用） &echo.
+echo				0. 返回(q) &echo.
 call :print_separator
-echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
+set /p a=请输入你的选择: 
+if "%a%"=="1" (
 	echo 正在设置为“从不通知”...
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 0 /f >nul 2>&1
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 0 /f >nul 2>&1
 	call :sleep "完成！" 3
-) else if "%submenu_option%"=="2" (
+) else if "%a%"=="2" (
 	echo 正在恢复默认设置... 
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 5 /f >nul 2>&1
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 1 /f >nul 2>&1
 	call :sleep "完成！" 3
-) else if "%submenu_option%"=="3" (
+) else if "%a%"=="3" (
 	echo 正在彻底关闭 UAC... 
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f >nul 2>&1
 	call :sleep "设置完成！请重启系统以生效。 " 5
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto uac_setting
 
 :: WIFI密码
 :wifi_password
-call :print_title "WIFI密码" 25 
+call :print_title "WIFI密码"
 setlocal
 echo 获取系统连接过的WIFI账号和密码
-call :print_separator "="
+call :print_separator
 for /f "tokens=2 delims=:" %%i in ('netsh wlan show profiles ^| findstr "All User Profile"') do (
 	set "ssid=%%i"
 	set "ssid=!ssid:~1!" 
@@ -910,7 +907,7 @@ for /f "tokens=2 delims=:" %%i in ('netsh wlan show profiles ^| findstr "All Use
 	set "output=!ssid!                         " 
 	echo !output:~0,20! !password!
 )
-call :print_separator "="
+call :print_separator
 echo 获取完毕,按键任意键继续 & pause>nul
 endlocal & exit /b
 
@@ -921,38 +918,38 @@ exit /b
 
 :: 电源管理 
 :power_setting
-call :print_title "电源管理" 25
-set "submenu_option="
+call :print_title "电源管理"
+set "a="
 call :print_separator
-echo  1. 设置定时关机/重启/休眠 
-echo  2. 禁用自动睡眠* 
-echo  3. 打开电源选项 
-echo  4. 禁用休眠(删除 hiberfil.sys)* 
-echo  5. 启用休眠 
-echo  0. 返回(q) 
+echo				1. 设置定时关机/重启/休眠 &echo.
+echo				2. 禁用自动睡眠* &echo.
+echo				3. 打开电源选项 &echo.
+echo				4. 禁用休眠(删除 hiberfil.sys)* &echo.
+echo				5. 启用休眠 &echo.
+echo				0. 返回(q) &echo.
 call :print_separator "~"
 echo 睡眠：保持内存通电，快速恢复(耗电少) 
 echo 休眠：将内存数据保存到硬盘 hiberfil.sys 后完全关机(零耗电) 
 call :print_separator
 echo.
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
+set /p a=请输入你的选择: 
+if "%a%"=="1" (
 	call :power_schedule
-) else if "%submenu_option%"=="2" (
+) else if "%a%"=="2" (
 	powercfg -change -standby-timeout-ac 0
 	powercfg -change -standby-timeout-dc 0
 	echo 已禁用自动睡眠 & timeout /t 3
-) else if "%submenu_option%"=="3" (
+) else if "%a%"=="3" (
 	control powercfg.cpl
-) else if "%submenu_option%"=="4" (
+) else if "%a%"=="4" (
 	powercfg -h off
 	echo 已禁用休眠 & timeout /t 4
-) else if "%submenu_option%"=="5" (
+) else if "%a%"=="5" (
 	powercfg -h on
 	echo 已启用休眠 & timeout /t 4
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto power_setting
 
 ::定时关机/重启/休眠 
@@ -1002,16 +999,15 @@ exit /b
 
 :: 预装应用管理
 :pre_installed_app
-color 0A
-mode con cols=60 lines=30
-call :print_title "预装应用管理" 24
-set "submenu_option="
+color %color%
+call :print_title "预装应用管理"
+set "a="
 call :print_separator
-echo  1. 一键卸载预装应用 
-echo  2. 打开程序和功能 
-echo  3. 卸载OneDrive 
-echo  4. 安装OneDrive 
-echo  0. 返回(q) 
+echo				1. 一键卸载预装应用 &echo.
+echo				2. 打开程序和功能 &echo.
+echo				3. 卸载OneDrive &echo.
+echo				4. 安装OneDrive &echo.
+echo				0. 返回(q) &echo.
 call :print_separator
 where winget >nul 2>&1
 if errorlevel 1 (
@@ -1019,40 +1015,40 @@ if errorlevel 1 (
     echo https://apps.microsoft.com/store/detail/9NBLGGH4NNS1 & pause>nul
 	exit /b
 )
-set /p submenu_option=请输入你的选择: 
-if "%submenu_option%"=="1" (
+set /p a=请输入你的选择: 
+if "%a%"=="1" (
 	call :uninstall_preinstalled_apps
-)else if "%submenu_option%"=="2" (
+)else if "%a%"=="2" (
 	start "" appwiz.cpl
-)else if "%submenu_option%"=="3" (
+)else if "%a%"=="3" (
 	echo 卸载 OneDrive...
 	call :uninstall_OneDrive
 	call :sleep "OneDrive 已卸载！" 4
-)else if "%submenu_option%"=="4" (
+)else if "%a%"=="4" (
 	echo 正在安装 OneDrive...
 	call :install_OneDrive
 	call :sleep "OneDrive 已安装！" 4
 )
-if "%submenu_option%"=="0" exit /b
-if /i "%submenu_option%"=="q" exit /b
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
 goto pre_installed_app
 
 ::卸载预装应用
 :uninstall_preinstalled_apps
-echo 预装的应用包括：
-echo   Microsoft 365 Copilot
-echo   Microsoft Clipchamp
-echo   Microsoft To Do
-echo   Microsoft 必应
-echo   Microsoft 资讯
-echo   Game Bar
-echo   Solitaire ^& Casual Games
-echo   Xbox、Xbox TCUI、Xbox Identity Provider
-echo   反馈中心
-echo   Power Automate
-echo   资讯
-echo   Outlook for Windows
-echo   小组件
+echo	预装的应用包括：
+echo		Microsoft 365 Copilot
+echo		Microsoft Clipchamp
+echo		Microsoft To Do
+echo		Microsoft 必应
+echo		Microsoft 资讯
+echo		Game Bar
+echo		Solitaire ^& Casual Games
+echo		Xbox、Xbox TCUI、Xbox Identity Provider
+echo		反馈中心
+echo		Power Automate
+echo		资讯
+echo		Outlook for Windows
+echo		小组件
 echo.
 call :ask_confirm "是否进行卸载? [Y/n]? " y
 if errorlevel 1 exit /b
@@ -1124,32 +1120,31 @@ exit /b
 
 :network_setting
 setlocal enabledelayedexpansion
-call :print_title "网络管理" 26
-set "submenu_option="
+call :print_title "网络管理"
+set "a="
 call :print_separator
-echo   1. 网络信息                  11. 远程桌面 
-echo   2. 打开网络连接控制面板      12. 一键断网/联网 
-echo   3. 清除DNS缓存 
-echo   4. ping检查 
-echo   5. tracert路由追踪 
-echo   6. 我的外网IP 
-echo   7. 检查端口占用 
-echo   8. 测速网 
-echo   9. 安装telnet客户端 
-echo  10. telehack.com
-echo   0. 返回(q) 
+echo			1. 网络信息                  11. 远程桌面 &echo.
+echo			2. 打开网络连接控制面板      12. 一键断网/联网 &echo.
+echo			3. 清除DNS缓存 &echo.
+echo			4. ping检查 &echo.
+echo			5. tracert路由追踪 &echo.
+echo			6. 我的外网IP &echo.
+echo			7. 检查端口占用 &echo.
+echo			8. 测速网 &echo.
+echo			9. 安装telnet客户端 &echo.
+echo			10. telehack.com&echo.
+echo			0. 返回(q) &echo.
 call :print_separator
-echo.
-set /p "submenu_option=请输入你的选择: "
-if "%submenu_option%"=="1" (
+set /p "a=请输入你的选择: "
+if "%a%"=="1" (
 	set "command_line=ipconfig /all"
 	start "!command_line!" cmd /k "!command_line!"
-) else if "%submenu_option%"=="2" (
+) else if "%a%"=="2" (
 	start ncpa.cpl
-) else if "%submenu_option%"=="3" (
+) else if "%a%"=="3" (
 	ipconfig /flushdns
 	call :sleep " " 4
-) else if "%submenu_option%"=="4" (
+) else if "%a%"=="4" (
     echo.
     set "ping_target="
     set /p "ping_target=请输入要ping的IP或域名[默认: baidu.com]: "
@@ -1161,35 +1156,35 @@ if "%submenu_option%"=="1" (
 		set "ping_cmd=ping !ping_target! -n 4"
 	)
     start "Ping检查: !ping_target!" cmd /k "!ping_cmd!"
-) else if "%submenu_option%"=="5" (
+) else if "%a%"=="5" (
     echo.
     set "trace_target="
     set /p "trace_target=请输入要追踪的IP或域名[默认: baidu.com]: "
     if "!trace_target!"=="" set "trace_target=baidu.com"
     start "路由追踪: !trace_target!" cmd /k "tracert !trace_target!"
-) else if "%submenu_option%"=="6" (
+) else if "%a%"=="6" (
 	echo.
 	curl.exe -s -L --connect-timeout 5 --max-time 10 https://myip.ipip.net/
 	echo https://myip.ipip.net 提供服务支持 & pause>nul
-) else if "%submenu_option%"=="7" (
+) else if "%a%"=="7" (
 	call :search_port
 	call :sleep "end.." 5
-) else if "%submenu_option%"=="8" (
+) else if "%a%"=="8" (
 	start "" https://www.speedtest.cn/
-) else if "%submenu_option%"=="9" (
+) else if "%a%"=="9" (
 	call :install_telnet
-) else if "%submenu_option%"=="10" (
+) else if "%a%"=="10" (
 	call :start_telehack
-) else if "%submenu_option%"=="11" (
+) else if "%a%"=="11" (
 	call :remote_desktop
 	call :sleep "远程桌面设置成功" 5
-) else if "%submenu_option%"=="12" (
+) else if "%a%"=="12" (
 	call :internet_control
 	if "!errorlevel!"=="1" (set "net_status=断网") else (set "net_status=联网")
 	call :sleep "已设置!net_status!！" 5
 )
-if "%submenu_option%"=="0" endlocal & exit /b
-if /i "%submenu_option%"=="q" endlocal &  exit /b
+if "%a%"=="0" endlocal & exit /b
+if /i "%a%"=="q" endlocal &  exit /b
 goto :network_setting 
 
 :search_port
@@ -1267,17 +1262,16 @@ if "%errorlevel%"=="1" (
 :: 设备管理 
 :device_setting
 setlocal enabledelayedexpansion
-call :print_title "设备管理" 25
+call :print_title "设备管理"
 set "device="
 call :print_separator
-echo    1. 照相机 
-echo    2. 蓝牙 
-echo    0. 返回(q) 
+echo				1. 照相机 &echo.
+echo				2. 蓝牙 &echo.
+echo				0. 返回(q) &echo.
 echo.
 call :print_separator "~"
 echo    通过禁用或开启对应功能来保护系统安全。
 call :print_separator
-echo.
 set /p "c=请选择你要管理的设备: "
 if not defined c goto :device_setting
 if "%c%"=="0" endlocal & exit /b
@@ -1307,22 +1301,22 @@ exit /b
 :microsoft_pinyin
 setlocal enabledelayedexpansion
 call :print_title "微软拼音输入法设置"
-set "submenu_option="
+set "a="
 call :print_separator
-echo   1. 双拼输入 
-echo   2. 全拼输入 
-echo   3. 打开微软拼音设置 
-echo   0. 返回(q) 
+echo				1. 双拼输入 &echo.
+echo				2. 全拼输入 &echo.
+echo				3. 打开微软拼音设置 &echo.
+echo				0. 返回(q) &echo.
 call :print_separator "~"
 echo  该设置仅用于【微软拼音输入法】，其他输入法请勿使用。 
 call :print_separator
 echo.
-set /p "submenu_option=请输入你的选择: "
-if "%submenu_option%"=="1" (
-	echo.&echo 可选双拼方案： 
-	echo   1. 软微双拼 
-	echo   2. 智能ABC 
-	echo   3. 自然码 
+set /p "a=请输入你的选择: "
+if "%a%"=="1" (
+	echo.&echo		可选双拼方案： 
+	echo				1. 软微双拼 
+	echo				2. 智能ABC 
+	echo				3. 自然码 
 	choice /c 123 /n /m "请输入双拼方案: " 
 	set /a sp_option=!errorlevel!
 	if !sp_option! == 1 set "sp_code=0"
@@ -1331,14 +1325,14 @@ if "%submenu_option%"=="1" (
 	call :microsoft_pinyin_select 1
 	call :microsoft_pinyin_sp !sp_code!
 	call :sleep "已设置双拼输入法" 6
-)else if "%submenu_option%"=="2" (
+)else if "%a%"=="2" (
 	call :microsoft_pinyin_select 0
 	call :sleep "已设置全拼输入法" 6
-)else if "%submenu_option%"=="3" (
+)else if "%a%"=="3" (
 	start ms-settings:regionlanguage-chsime-pinyin
 )
-if "%submenu_option%"=="0" endlocal & exit /b
-if /i "%submenu_option%"=="q" endlocal & exit /b
+if "%a%"=="0" endlocal & exit /b
+if /i "%a%"=="q" endlocal & exit /b
 endlocal
 goto :microsoft_pinyin
 
@@ -1354,28 +1348,26 @@ exit /b
 
 :: 图一乐 
 :hahaha
-mode con cols=90 lines=30
 setlocal enabledelayedexpansion
-call :print_title "图一乐" 40
+call :print_title "图一乐"
 set "c="
-call :print_separator "*" 90
-echo  1. 假装更新            11. neal.fun             21. Poki              31. 空难信息网  
-echo  2. 黑客打字            12. 人类基准测试         22. 邦戈猫            32. 童年在线游戏
-echo  3. 模拟macOS桌面       13. 时光邮局             23. 全历史            33. 一分钟公园
-echo  4. windows93           14. 全球在线广播         24. 对称光绘          34. 图寻 
-echo  5. IBM PC模拟器        15. 全球天气动态         25. 互联网坟墓        35. 梦乡
-echo  6. 侏罗纪公园系统      16. 全球航班追踪         26. 语保工程          36. 猜密码 
-echo  7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放          37. A Real Me 
-echo  8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿           
-echo  9. 假装黑客            19. 能不能好好说话       29. 白噪音 
-echo 10. 无用网站            20. 自由钢琴             30. 宇宙的刻度 
-echo  0. 返回(q) 
-call :print_separator "*" 90
-echo.
+call :print_separator
+echo		1. 假装更新            11. neal.fun             21. Poki              31. 空难信息网  
+echo		2. 黑客打字            12. 人类基准测试         22. 邦戈猫            32. 童年在线游戏
+echo		3. 模拟macOS桌面       13. 时光邮局             23. 全历史            33. 一分钟公园
+echo		4. windows93           14. 全球在线广播         24. 对称光绘          34. 图寻 
+echo		5. IBM PC模拟器        15. 全球天气动态         25. 互联网坟墓        35. 梦乡
+echo		6. 侏罗纪公园系统      16. 全球航班追踪         26. 语保工程          36. 猜密码 
+echo		7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放          37. A Real Me 
+echo		8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿           
+echo		9. 假装黑客            19. 能不能好好说话       29. 白噪音 
+echo		10. 无用网站           20. 自由钢琴            30. 宇宙的刻度 
+echo		0. 返回(q) 
+call :print_separator
 set /p "c=请输入你的选择（回车随机选一个）: "
 if "%c%"=="" (
-    set /a "rand_num=!random! %% 38 + 1"
-    set "c=!rand_num!"
+	set /a "rand_num=!random! %% 38 + 1"
+	set "c=!rand_num!"
 	call :sleep "随机选择了 !c! 正在打开网站……" 3
 )
 if "%c%"=="1"  start "" https://fakeupdate.net/ 
@@ -1421,9 +1413,8 @@ goto :hahaha
 
 :: 检查脚本更新 
 :update_script
-mode con cols=80 lines=25
-call :print_title "检查更新" 35
-call :print_separator "*" 80
+call :print_title "检查更新"
+call :print_separator
 set "jsonUrl=https://files.cnblogs.com/files/zjw-blog/config.json"
 set "BAT_NEW_TMP=%TEMP%\wmtool.tmp"
 set "UPDATE_SCRIPT=%TEMP%\wmtool_update.bat"
@@ -1437,15 +1428,15 @@ for /f "usebackq tokens=1,* delims==" %%A in (`
 `) do (
     set "%%A=%%B"
 )
-echo        ┌─────────────────────────────┬────────────────────────────┐ 
-echo        │             本地            │             最新           │ 
-echo        ├─────────────────────────────┼────────────────────────────│ 
-echo        │                             │                            │ 
-echo        │     版本号：%rversion%          │     版本号：%remote_rversion%         │ 
-echo        │                             │                            │ 
-echo        │     更新时间：%updated%      │     更新时间：%remote_updated%     │ 
-echo        │                             │                            │ 
-echo        └─────────────────────────────┴────────────────────────────┘ 
+echo			┌─────────────────────────────┬────────────────────────────┐ 
+echo			│             本地            │             最新           │ 
+echo			├─────────────────────────────┼────────────────────────────│ 
+echo			│                             │                            │ 
+echo			│     版本号：%rversion%          │     版本号：%remote_rversion%         │ 
+echo			│                             │                            │ 
+echo			│     更新时间：%updated%      │     更新时间：%remote_updated%     │ 
+echo			│                             │                            │ 
+echo			└─────────────────────────────┴────────────────────────────┘ 
 echo.
 if not defined remote_updated (
 	call :sleep "无法获取远程更新日期，放弃更新。" 5
@@ -1482,9 +1473,8 @@ start "" /B cmd /c call "%UPDATE_SCRIPT%" & exit
 
 :: 关于
 :about_me
-mode con cols=80 lines=25
-call :print_title "关于" 36
-call :print_separator "*" 80
+call :print_title "关于"
+call :print_separator
 echo.
 echo    Windows-Manage-Tool(WMT),是一个主要在Windows11上使用的批处理 
 echo    小工具，集成了多个系统设置，旨在简化日常维护和系统设置操作。 
@@ -1508,16 +1498,17 @@ exit /b
 
 :: 分割线
 :: 参数1：分隔符字符，默认 *
-:: 参数2：重复次数，默认 60
+:: 参数2：重复次数，默认为窗口宽度 
 :print_separator
 setlocal ENABLEDELAYEDEXPANSION
 set "char=%~1" 
-if "%char%"=="" set "char=*"
+if "%char%"=="" set "char=%separator%"
 set "count=%~2"
-if "%count%"=="" set "count=60"
+if "%count%"=="" set "count=%cols%"
 set "line="
 for /L %%i in (1,1,%count%) do (set "line=!line!!char!")
 echo !line!
+echo.
 endlocal
 exit /b
 
@@ -1528,13 +1519,14 @@ setlocal & cls
 set "title=%~1"
 set "count=%~2"
 if "%count%"=="" (
-    set "space_str=                     " 
+    set "space_str=                                       " 
 ) else (
     set "space_str="
     for /L %%i in (1,1,%count%) do (set "space_str=!space_str! ")
 )
 echo.
 echo !space_str!!title!
+echo.
 endlocal & exit /b
 
 :restart_explorer
