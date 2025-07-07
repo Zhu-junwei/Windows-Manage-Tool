@@ -1125,7 +1125,7 @@ set "a="
 call :print_separator
 echo			1. 网络信息                  11. 远程桌面 &echo.
 echo			2. 打开网络连接控制面板      12. 一键断网/联网 &echo.
-echo			3. 清除DNS缓存 &echo.
+echo			3. 清除DNS缓存               13. 防火墙设置 &echo.
 echo			4. ping检查 &echo.
 echo			5. tracert路由追踪 &echo.
 echo			6. 我的外网IP &echo.
@@ -1165,7 +1165,7 @@ if "%a%"=="1" (
 ) else if "%a%"=="6" (
 	echo.
 	curl.exe -s -L --connect-timeout 5 --max-time 10 https://myip.ipip.net/
-	echo https://myip.ipip.net 提供服务支持 & pause>nul
+	echo https://myip.ipip.net 提供服务支持 & pause
 ) else if "%a%"=="7" (
 	call :search_port
 	call :sleep "end.." 5
@@ -1182,7 +1182,10 @@ if "%a%"=="1" (
 	call :internet_control
 	if "!errorlevel!"=="1" (set "net_status=断网") else (set "net_status=联网")
 	call :sleep "已设置!net_status!！" 5
+) else if "%a%"=="13" (
+	call :advfirewall_setting
 )
+
 if "%a%"=="0" endlocal & exit /b
 if /i "%a%"=="q" endlocal &  exit /b
 goto :network_setting 
@@ -1259,11 +1262,29 @@ if "%errorlevel%"=="1" (
 	exit /b 2
 )
 
+:: 防火墙设置 
+:advfirewall_setting
+set "firwall_c="
+choice /c 1234 /n /m "防火墙设置 [1.关闭 2.开启 3.重置 4.手动]: "
+if "%errorlevel%"=="1" (
+	netsh advfirewall set allprofiles state off >nul 2>&1
+	call :sleep "防火墙已关闭" 3
+) else if "%errorlevel%"=="2" (
+	netsh advfirewall set allprofiles state on >nul 2>&1
+	call :sleep "防火墙已开启" 3
+) else if "%errorlevel%"=="3" (
+	netsh advfirewall set allprofiles state reset >nul 2>&1
+	call :sleep "防火墙已重置" 3
+) else if "%errorlevel%"=="4" (
+	start "" wf.msc
+)
+exit /b
+
 :: 设备管理 
 :device_setting
 setlocal enabledelayedexpansion
 call :print_title "设备管理"
-set "device="
+set "c="
 call :print_separator
 echo				1. 照相机 &echo.
 echo				2. 蓝牙 &echo.
@@ -1348,65 +1369,79 @@ exit /b
 
 :: 图一乐 
 :hahaha
-setlocal enabledelayedexpansion
+setlocal
 call :print_title "图一乐"
 set "c="
 call :print_separator
-echo		1. 假装更新            11. neal.fun             21. Poki              31. 空难信息网  
-echo		2. 黑客打字            12. 人类基准测试         22. 邦戈猫            32. 童年在线游戏
-echo		3. 模拟macOS桌面       13. 时光邮局             23. 全历史            33. 一分钟公园
-echo		4. windows93           14. 全球在线广播         24. 对称光绘          34. 图寻 
-echo		5. IBM PC模拟器        15. 全球天气动态         25. 互联网坟墓        35. 梦乡
-echo		6. 侏罗纪公园系统      16. 全球航班追踪         26. 语保工程          36. 猜密码 
-echo		7. Unix 系统模拟器     17. 魔性蠕虫             27. 无限缩放          37. A Real Me 
-echo		8. 卡巴斯基网络威胁    18. 狗屁不通文章生成器   28. 无限马腿           
-echo		9. 假装黑客            19. 能不能好好说话       29. 白噪音 
-echo		10. 无用网站           20. 自由钢琴            30. 宇宙的刻度 
-echo		0. 返回(q) 
+echo         1. 假装更新             16. 全球航班追踪         31. 空难信息网 
+echo         2. 黑客打字             17. 魔性蠕虫             32. 童年在线游戏 
+echo         3. 模拟macOS桌面        18. 狗屁不通文章生成器   33. 一分钟公园
+echo         4. windows93            19. 能不能好好说话       34. 图寻 
+echo         5. IBM PC模拟器         20. 自由钢琴             35. 梦乡 
+echo         6. 侏罗纪公园系统       21. Poki                 36. 猜密码 
+echo         7. Unix 系统模拟器      22. 邦戈猫               37. A Real Me 
+echo         8. 卡巴斯基网络威胁     23. 全历史               38. 人生重开模拟器  
+echo         9. 假装黑客             24. 对称光绘             39. 寻找隐藏的牛 
+echo        10. 无用网站             25. 互联网坟墓           40. 开车 
+echo        11. neal.fun             26. 语保工程             41. 实况摄像头 
+echo        12. 人类基准测试         27. 无限缩放             42. 狗神 
+echo        13. 时光邮局             28. 无限马腿             43. 有趣网址之家 
+echo        14. 全球在线广播         29. 白噪音               44. 很相思 
+echo        15. 全球天气动态         30. 宇宙的刻度           45. 秘密花园 
+echo.
+echo        0. 返回(q) 
 call :print_separator
 set /p "c=请输入你的选择（回车随机选一个）: "
 if "%c%"=="" (
-	set /a "rand_num=!random! %% 38 + 1"
+	set /a "rand_num=!random! %% 45 + 1"
 	set "c=!rand_num!"
 	call :sleep "随机选择了 !c! 正在打开网站……" 3
 )
-if "%c%"=="1"  start "" https://fakeupdate.net/ 
-if "%c%"=="2"  start "" https://hackertyper.net/ 
-if "%c%"=="3"  start "" https://turbomac.netlify.app/ 
-if "%c%"=="4"  start "" https://www.windows93.net/ 
-if "%c%"=="5"  start "" https://www.pcjs.org/ 
-if "%c%"=="6"  start "" https://www.jurassicsystems.com/ 
-if "%c%"=="7"  start "" https://www.masswerk.at/jsuix/index.html 
+if "%c%"=="1"  start "" https://fakeupdate.net
+if "%c%"=="2"  start "" https://hackertyper.net
+if "%c%"=="3"  start "" https://turbomac.netlify.app
+if "%c%"=="4"  start "" https://www.windows93.net
+if "%c%"=="5"  start "" https://www.pcjs.org
+if "%c%"=="6"  start "" https://www.jurassicsystems.com
+if "%c%"=="7"  start "" https://www.masswerk.at/jsuix/index.html
 if "%c%"=="8"  start "" https://cybermap.kaspersky.com/cn 
-if "%c%"=="9"  start "" https://geektyper.com/ 
-if "%c%"=="10" start "" https://theuselessweb.com/ 
-if "%c%"=="11" start "" https://neal.fun/ 
-if "%c%"=="12" start "" https://humanbenchmark.com/ 
-if "%c%"=="13" start "" https://www.hi2future.com/ 
-if "%c%"=="14" start "" https://radio.garden/ 
-if "%c%"=="15" start "" https://earth.nullschool.net/zh-cn/ 
-if "%c%"=="16" start "" https://www.flightradar24.com/ 
-if "%c%"=="17" start "" http://www.staggeringbeauty.com/ 
-if "%c%"=="18" start "" https://suulnnka.github.io/BullshitGenerator/index.html 
-if "%c%"=="19" start "" https://lab.magiconch.com/nbnhhsh/ 
-if "%c%"=="20" start "" https://www.autopiano.cn/ 
-if "%c%"=="21" start "" https://poki.com/zh 
-if "%c%"=="22" start "" https://bongo.cat/ 
-if "%c%"=="23" start "" https://www.allhistory.com/ 
-if "%c%"=="24" start "" http://weavesilk.com/ 
-if "%c%"=="25" start "" https://wiki.archiveteam.org/ 
-if "%c%"=="26" start "" https://zhongguoyuyan.cn 
-if "%c%"=="27" start "" https://zoomquilt.org/ 
-if "%c%"=="28" start "" http://endless.horse/ 
-if "%c%"=="29" start "" https://asoftmurmur.com/ 
-if "%c%"=="30" start "" https://scaleofuniverse.com/zh 
-if "%c%"=="31" start "" https://www.planecrashinfo.com/ 
-if "%c%"=="32" start "" https://www.yikm.net/ 
-if "%c%"=="33" start "" https://oneminutepark.tv/
-if "%c%"=="34" start "" https://tuxun.fun/
-if "%c%"=="35" start "" http://yume.ly/
-if "%c%"=="36" start "" https://www.guessthepin.com/
+if "%c%"=="9"  start "" https://geektyper.com
+if "%c%"=="10" start "" https://theuselessweb.com
+if "%c%"=="11" start "" https://neal.fun
+if "%c%"=="12" start "" https://humanbenchmark.com
+if "%c%"=="13" start "" https://www.hi2future.com
+if "%c%"=="14" start "" https://radio.garden
+if "%c%"=="15" start "" https://earth.nullschool.net/zh-cn
+if "%c%"=="16" start "" https://www.flightradar24.com
+if "%c%"=="17" start "" http://www.staggeringbeauty.com
+if "%c%"=="18" start "" https://suulnnka.github.io/BullshitGenerator/index.html
+if "%c%"=="19" start "" https://lab.magiconch.com/nbnhhsh
+if "%c%"=="20" start "" https://www.autopiano.cn
+if "%c%"=="21" start "" https://poki.com/zh
+if "%c%"=="22" start "" https://bongo.cat
+if "%c%"=="23" start "" https://www.allhistory.com
+if "%c%"=="24" start "" http://weavesilk.com
+if "%c%"=="25" start "" https://wiki.archiveteam.org
+if "%c%"=="26" start "" https://zhongguoyuyan.cn
+if "%c%"=="27" start "" https://zoomquilt.org
+if "%c%"=="28" start "" http://endless.horse
+if "%c%"=="29" start "" https://asoftmurmur.com
+if "%c%"=="30" start "" https://scaleofuniverse.com/zh
+if "%c%"=="31" start "" https://www.planecrashinfo.com
+if "%c%"=="32" start "" https://www.yikm.net
+if "%c%"=="33" start "" https://oneminutepark.tv
+if "%c%"=="34" start "" https://tuxun.fun
+if "%c%"=="35" start "" http://yume.ly
+if "%c%"=="36" start "" https://www.guessthepin.com
 if "%c%"=="37" start "" https://www.arealme.com/cn
+if "%c%"=="38" start "" https://rest.latiao.online
+if "%c%"=="39" start "" https://findtheinvisiblecow.com
+if "%c%"=="40" start "" https://slowroads.io
+if "%c%"=="41" start "" https://www.skylinewebcams.com
+if "%c%"=="42" start "" https://dogod.io
+if "%c%"=="43" start "" https://youquhome.com
+if "%c%"=="44" start "" https://henxiangsi.com
+if "%c%"=="45" start "" http://www.yini.org
 if "%c%"=="0" endlocal & exit /b
 if /i "%c%"=="q" endlocal & exit /b
 goto :hahaha
