@@ -20,38 +20,36 @@ mode con cols=%cols% lines=%lines%
 call :print_title "%title%"
 set "c="
 call :print_separator
-echo			1. 右键菜单设置                  11. WIFI密码 &echo.
-echo			2. 桌面设置                      12. 电源管理 &echo.
-echo			3. 任务栏设置                    13. 预装应用管理 &echo.
-echo			4. 资源管理器设置                14. 编辑hosts &echo.
-echo			5. 下载 Office                   15. 网络管理 &echo.
-echo			6. 下载 Windows                  16. 设备管理 &echo.
-echo			7. 激活 Windows ^& Office         17. 微软拼音输入法 &echo.
-echo			8. Windows更新设置               18. 图一乐 &echo.
-echo			9. UAC（用户账户控制）设置 &echo.
-echo			10. 上帝模式                     &echo.
-echo			0. 退出(q)                       00. 关于               99. 检查更新&echo.
+echo			1. 右键菜单设置                  11. 电源管理 &echo.
+echo			2. 桌面设置                      12. 预装应用管理 &echo.
+echo			3. 任务栏设置                    13. 编辑hosts &echo.
+echo			4. 资源管理器设置                14. 网络管理 &echo.
+echo			5. 下载 Windows ^& Office         15. 设备管理 &echo.
+echo			6. 激活 Windows ^& Office         16. 微软拼音输入法 &echo.
+echo			7. Windows更新设置               17. 图一乐 &echo.
+echo			8. UAC（用户账户控制）设置 &echo.
+echo			9. 上帝模式 &echo.
+echo			10. WIFI密码 &echo.
+echo			0. 退出(q)                       00. 关于&echo.
 call :print_separator
 set /p c=请输入你的选择: 
 if "%c%"=="1"  call :submenu_right_click
 if "%c%"=="2"  call :desktop
 if "%c%"=="3"  call :taskbar
 if "%c%"=="4"  call :explorer_setting
-if "%c%"=="5"  call :download_office
-if "%c%"=="6"  call :download_windows
-if "%c%"=="7"  call :activate_windows
-if "%c%"=="8"  call :windows_update
-if "%c%"=="9"  call :uac_setting
-if "%c%"=="10" call :god_mod
-if "%c%"=="11" call :wifi_password
-if "%c%"=="12" call :power_setting
-if "%c%"=="13" call :pre_installed_app
-if "%c%"=="14" call :hosts_editor
-if "%c%"=="15" call :network_setting
-if "%c%"=="16" call :device_setting
-if "%c%"=="17" call :microsoft_pinyin
-if "%c%"=="18" call :hahaha
-if "%c%"=="99" call :update_script
+if "%c%"=="5"  call :download_windows_office
+if "%c%"=="6"  call :activate_windows_office
+if "%c%"=="7"  call :windows_update
+if "%c%"=="8"  call :uac_setting
+if "%c%"=="9" call :god_mod
+if "%c%"=="10" call :wifi_password
+if "%c%"=="11" call :power_setting
+if "%c%"=="12" call :pre_installed_app
+if "%c%"=="13" call :hosts_editor
+if "%c%"=="14" call :network_setting
+if "%c%"=="15" call :device_setting
+if "%c%"=="16" call :microsoft_pinyin
+if "%c%"=="17" call :hahaha
 if "%c%"=="00" call :about_me
 if "%c%"=="0"  goto byebye
 if /i "%c%"=="q" goto byebye
@@ -738,32 +736,21 @@ if "%b%"=="0" exit /b
 if /i "%b%"=="q" exit /b
 goto this_computer_folder
 
-:: 下载 Office 
-:download_office
-call :print_title "下载 Office"
-set "a="
-call :print_separator
-echo				1. xb21cn &echo.
-echo				2. Office Tool Plus &echo.
-echo				0. 返回(q) &echo.
-call :print_separator
-set /p a=请输入你的选择: 
-if "%a%"=="1" start "" https://www.xb21cn.com/
-if "%a%"=="2" start powershell -NoProfile -ExecutionPolicy Bypass -Command "irm officetool.plus | iex"
-if "%a%"=="0" exit /b
-if /i "%a%"=="q" exit /b
-goto :download_office
-
 :: 下载 Windows
-:download_windows
-call :print_title "下载 Windows"
+:download_windows_office
+call :print_title "下载 Windows & Office"
 set "a="
 call :print_separator
+echo		Windows:&echo.
 echo			1. 山己几子木      https://msdn.sjjzm.com/ &echo.
 echo			2. Microsoft官方   https://www.microsoft.com/zh-cn/software-download/ &echo.
 echo			3. NEXT,ITELLYOU   https://next.itellyou.cn/ &echo.
 echo			4. 不忘初心        https://www.pc528.net/ &echo.
 echo			5. 吻妻            https://www.newxitong.com/ &echo.
+echo		Office:&echo.
+echo			a. xb21cn              https://www.xb21cn.com/ &echo.
+echo			b. Office Tool Plus    https://www.officetool.plus/zh-cn/ &echo.
+echo			c. Microsoft官方       https://setup.office.com/ &echo.&echo.
 echo			0. 返回(q) &echo.
 call :print_separator
 set /p a=请输入你的选择: 
@@ -772,12 +759,15 @@ if "%a%"=="2" start "" https://www.microsoft.com/zh-cn/software-download/
 if "%a%"=="3" start "" https://next.itellyou.cn/
 if "%a%"=="4" start "" https://www.pc528.net/
 if "%a%"=="5" start "" https://www.newxitong.com/
+if /i "%a%"=="a" start "" https://www.xb21cn.com/
+if /i "%a%"=="b" start powershell -NoProfile -ExecutionPolicy Bypass -Command "irm officetool.plus | iex"
+if /i "%a%"=="c" start "" https://setup.office.com/
 if "%a%"=="0" exit /b
 if /i "%a%"=="q" exit /b
-goto download_windows
+goto download_windows_office
 
 :: 激活 Windows & Office
-:activate_windows
+:activate_windows_office
 start powershell -Command "irm https://get.activated.win | iex"
 exit /b
 
@@ -1491,11 +1481,9 @@ if not exist "%BAT_NEW_TMP%" (
 	exit /b
 )
 set "MAIN_SCRIPT_PATH=%~f0"
-:: 创建更新脚本 
 (
     echo @echo off
     echo chcp 65001^>nul
-    echo echo 正在更新脚本，请稍候... 
     echo copy /Y "%BAT_NEW_TMP%" "%MAIN_SCRIPT_PATH%"
     echo del /F /Q "%BAT_NEW_TMP%"
     echo start "" "%MAIN_SCRIPT_PATH%"
@@ -1503,10 +1491,9 @@ set "MAIN_SCRIPT_PATH=%~f0"
     echo del /F /Q "%%~f0" ^>nul 2^>nul
     echo exit
 ) > "%UPDATE_SCRIPT%"
-:: 启动更新脚本并退出当前实例
 start "" /B cmd /c call "%UPDATE_SCRIPT%" & exit
 
-:: 关于
+:: 关于 
 :about_me
 call :print_title "关于"
 call :print_separator
@@ -1528,7 +1515,12 @@ echo  特别鸣谢：
 echo. 
 echo      博客园 批处理之家 吾爱破解 GitHub 蓝奏云 ChatGPT DeepSeek 
 echo.
-echo ^<- 回车返回 & pause>nul
+call :print_separator
+echo			0. 返回(q)		1. 检查更新 &echo.
+call :print_separator
+set "a="
+set /p "a=请输入你的选择: "
+if "%a%"=="1" call :update_script & goto :about_me
 exit /b
 
 :: 分割线
@@ -1544,8 +1536,7 @@ set "line="
 for /L %%i in (1,1,%count%) do (set "line=!line!!char!")
 echo !line!
 echo.
-endlocal
-exit /b
+endlocal & exit /b
 
 :: 打印标题 
 :: 参数1 = 文本内容 
