@@ -18,7 +18,7 @@ color %color%
 :main_menu 
 mode con cols=%cols% lines=%lines%
 call :print_title "%title%"
-set "main_option="
+set "c="
 call :print_separator
 echo			1. 右键菜单设置                  11. WIFI密码 &echo.
 echo			2. 桌面设置                      12. 电源管理 &echo.
