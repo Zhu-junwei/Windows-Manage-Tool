@@ -1,7 +1,8 @@
 @echo off & setlocal EnableDelayedExpansion & chcp 65001>nul
 
 :: 获取管理员权限
-net session >nul 2>&1||mshta vbscript:CreateObject("Shell.Application").ShellExecute("cmd.exe","/c cd /d ""%~dp0"" && %~s0 %*","","runas",1)(window.close)&&exit
+if "%1" neq "runas" mshta vbscript:CreateObject("Shell.Application").ShellExecute("conhost.exe","cmd.exe /c ""%~f0"" runas %*","","runas",1)(window.close)&&exit
+shift
 
 :: 一些配置参数 
 set "color=0A"
@@ -768,7 +769,26 @@ goto download_windows_office
 
 :: 激活 Windows & Office
 :activate_windows_office
-start powershell -Command "irm https://get.activated.win | iex"
+call :print_title "Windows更新设置"
+set "a="
+call :print_separator
+echo			1. Microsoft Activation Scripts (MAS) &echo.
+echo			2. HEU_KMS_Activator &echo.
+echo			3. KMS_VL_ALL_AIO &echo.
+echo			0. 返回(q) &echo.
+call :print_separator
+echo.
+set /p a=请输入你的选择: 
+if "%a%"=="1" (
+	start powershell -Command "irm https://get.activated.win | iex"
+) else if "%a%"=="2" (
+	start "" https://github.com/zbezj/HEU_KMS_Activator/releases
+) else if "%a%"=="3" (
+	start "" https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases
+)
+if "%a%"=="0" exit /b
+if /i "%a%"=="q" exit /b
+goto activate_windows_office
 exit /b
 
 @REM From https://www.52pojie.cn/thread-1791338-1-1.html
