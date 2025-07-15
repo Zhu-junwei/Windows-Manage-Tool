@@ -1,19 +1,22 @@
 @echo off & setlocal EnableDelayedExpansion & chcp 65001>nul
 
-:: 获取管理员权限
+:: 使用管理员权限 
 if "%1" neq "runas" mshta vbscript:CreateObject("Shell.Application").ShellExecute("conhost.exe","cmd.exe /c ""%~f0"" runas %*","","runas",1)(window.close)&&exit
-shift
+shift && cd /d "%~dp0"
 
 :: 一些配置参数 
 set "color=0A"
 set "title=Windows管理小工具"
-set "updated=20250702"
-set "rversion=v2.1.3"
+set "updated=20250715"
+set "rversion=v2.1.4"
 set "cols=100"
 set "lines=40"
 set "separator=="
 title %title% %rversion%
 color %color%
+
+:: 接收传参来直接调用特定的子程序 
+if not "%~1"=="" (call :%~1 & exit)
 
 :: 主菜单 
 :main_menu 
