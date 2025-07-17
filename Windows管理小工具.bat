@@ -13,14 +13,12 @@ set "cols=100"
 set "lines=40"
 set "separator=="
 title %title% %rversion%
-color %color%
-
+call :reset_color_size
 :: 接收传参来直接调用特定的子程序 
 if not "%~1"=="" (call :%~1 & exit)
 
 :: 主菜单 
 :main_menu 
-mode con cols=%cols% lines=%lines%
 call :print_title "%title%"
 set "c="
 call :print_separator
@@ -391,7 +389,7 @@ endlocal & exit /b
 
 :: 任务栏设置 
 :taskbar 
-::color 0A
+call :reset_color_size
 call :print_title "任务栏设置"
 set "a=" 
 call :print_separator
@@ -414,26 +412,26 @@ if "%a%"=="1" (
 	call :taskbar_unpin
 	call :widgets_uninstall
 	call :restart_explorer
-    call :sleep "操作完成！" 2
+	call :sleep "操作完成！" 2
 ) else if "%a%"=="2" (
 	call :widgets_disable
 	call :restart_explorer
-    call :sleep "操作完成！" 2
+	call :sleep "操作完成！" 2
 ) else if "%a%"=="3" (
 	call :widgets_enable
 	call :restart_explorer
-    call :sleep "操作完成！" 2
+	call :sleep "操作完成！" 2
 ) else if "%a%"=="4" (
 	call :widgets_uninstall
 	call :restart_explorer
-    call :sleep "操作完成！" 2
+	call :sleep "操作完成！" 2
 ) else if "%a%"=="5" (
 	call :widgets_install
 	call :restart_explorer
-    call :sleep "操作完成！" 2
-)  else if "%a%"=="6" (
+	call :sleep "操作完成！" 2
+) else if "%a%"=="6" (
 	call :hide_taskview
-    call :sleep "操作完成！" 2
+	call :sleep "操作完成！" 2
 ) else if "%a%"=="7" (
 	call :show_taskview
     call :sleep "操作完成！" 2
@@ -563,8 +561,8 @@ call :print_separator
 echo			1. 默认打开 此电脑         11. 禁用 U盘 &echo.
 echo			2. 默认打开 主文件夹       12. 启用 U盘 &echo.
 echo			3. 显示 扩展(后缀)名       13. Windows 10此电脑文件夹设置 &echo.
-echo			4. 隐藏 扩展(后缀)名 &echo.
-echo			5. 单击 打开文件 &echo.
+echo			4. 隐藏 扩展(后缀)名       14. 主文件夹开关&echo.
+echo			5. 单击 打开文件           15. 图库开关&echo.
 echo			6. 双击 打开文件 &echo.
 echo			7. 显示 复选框 &echo.
 echo			8. 隐藏 复选框 &echo.
@@ -620,6 +618,10 @@ if "%a%"=="1" (
 	call :sleep "已启用U盘使用" 6
 ) else if "%a%"=="13" (
 	call :this_computer_folder
+) else if "%a%"=="14" (
+	call :explorer_home_folder_toggle
+) else if "%a%"=="15" (
+	call :explorer_gallery_toggle
 )
 if "%a%"=="0" exit /b
 if /i "%a%"=="q" exit /b
@@ -740,6 +742,40 @@ if "%b%"=="0" exit /b
 if /i "%b%"=="q" exit /b
 goto this_computer_folder
 
+:: 资源管理器设置-左侧【主文件夹】显示隐藏 
+:explorer_home_folder_toggle
+set "HOME_FOLDER_TOGGLE_REG=tmp.reg"
+choice /c 123 /n /m "主文件夹设置? [1.隐藏 2.显示 3.返回]: "
+if "%errorlevel%"=="3" exit /b
+if "%errorlevel%"=="1" (set "v=0" & set "op_name=隐藏") else (set "v=1" & set "op_name=显示")
+(
+	echo Windows Registry Editor Version 5.00
+	echo.
+	echo [HKEY_CURRENT_USER\Software\Classes\CLSID\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}]
+	echo "System.IsPinnedToNameSpaceTree"=dword:0000000%v%
+) > "%HOME_FOLDER_TOGGLE_REG%"
+regedit.exe /s "%HOME_FOLDER_TOGGLE_REG%"
+IF EXIST "%HOME_FOLDER_TOGGLE_REG%" DEL "%HOME_FOLDER_TOGGLE_REG%"
+call :sleep "已设置主文件夹 %op_name% ，请重新打开资源管理器查看效果" 10
+exit /b
+
+:: 资源管理器设置-左侧【图库】显示隐藏 
+:explorer_gallery_toggle
+set "GALLERY_TOGGLE_REG=tmp.reg"
+choice /c 123 /n /m "图库设置? [1.隐藏 2.显示 3.返回]: "
+if "%errorlevel%"=="3" exit /b
+if "%errorlevel%"=="1" (set "v=0" & set "op_name=隐藏") else (set "v=1" & set "op_name=显示")
+(
+	echo Windows Registry Editor Version 5.00
+	echo.
+	echo [HKEY_CURRENT_USER\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}]
+	echo "System.IsPinnedToNameSpaceTree"=dword:0000000%v%
+) > "%GALLERY_TOGGLE_REG%"
+regedit.exe /s "%GALLERY_TOGGLE_REG%"
+IF EXIST "%GALLERY_TOGGLE_REG%" DEL "%GALLERY_TOGGLE_REG%"
+call :sleep "已设置图库 %op_name% ，请重新打开资源管理器查看效果" 10
+exit /b
+
 :: 下载 Windows
 :download_windows_office
 call :print_title "下载 Windows & Office"
@@ -772,7 +808,7 @@ goto download_windows_office
 
 :: 激活 Windows & Office
 :activate_windows_office
-call :print_title "Windows更新设置"
+call :print_title "激活 Windows & Office"
 set "a="
 call :print_separator
 echo			1. Microsoft Activation Scripts (MAS) &echo.
@@ -1012,7 +1048,7 @@ exit /b
 
 :: 预装应用管理
 :pre_installed_app
-color %color%
+call :reset_color_size
 call :print_title "预装应用管理"
 set "a="
 call :print_separator
@@ -1607,6 +1643,12 @@ if /i "%silent%"=="silent" (
     timeout /t %sec%
 )
 endlocal & exit /b
+
+:: 设置颜色和窗口大小 
+:reset_color_size
+color %color%
+mode con cols=%cols% lines=%lines%
+exit /b
 
 :byebye
 call :sleep "byebye" 1 silent
