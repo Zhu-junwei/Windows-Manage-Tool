@@ -19,16 +19,17 @@ if not "%~1"=="" (call :%~1 & exit)
 
 :: 主菜单 
 :main_menu 
+call :reset_color_size
 call :print_title "%title%"
 set "c="
 call :print_separator
 echo			1. 右键菜单设置                  11. 电源管理 &echo.
-echo			2. 桌面设置                      12. 预装应用管理 &echo.
+echo			2. 桌面设置                      12. 应用管理 &echo.
 echo			3. 任务栏设置                    13. 编辑hosts &echo.
 echo			4. 资源管理器设置                14. 网络管理 &echo.
 echo			5. 下载 Windows ^& Office         15. 设备管理 &echo.
-echo			6. 激活 Windows ^& Office         16. 微软拼音输入法 &echo.
-echo			7. Windows更新设置               17. 图一乐 &echo.
+echo			6. 激活 Windows ^& Office         16. 图一乐 &echo.
+echo			7. Windows更新设置                &echo.
 echo			8. UAC（用户账户控制）设置 &echo.
 echo			9. 上帝模式 &echo.
 echo			10. WIFI密码 &echo.
@@ -46,12 +47,11 @@ if "%c%"=="8"  call :uac_setting
 if "%c%"=="9" call :god_mod
 if "%c%"=="10" call :wifi_password
 if "%c%"=="11" call :power_setting
-if "%c%"=="12" call :pre_installed_app
+if "%c%"=="12" call :app_setting
 if "%c%"=="13" call :hosts_editor
 if "%c%"=="14" call :network_setting
 if "%c%"=="15" call :device_setting
-if "%c%"=="16" call :microsoft_pinyin
-if "%c%"=="17" call :hahaha
+if "%c%"=="16" call :hahaha
 if "%c%"=="00" call :about_me
 if "%c%"=="0"  goto byebye
 if /i "%c%"=="q" goto byebye
@@ -563,7 +563,7 @@ echo			2. 默认打开 主文件夹       12. 启用 U盘 &echo.
 echo			3. 显示 扩展(后缀)名       13. Windows 10此电脑文件夹设置 &echo.
 echo			4. 隐藏 扩展(后缀)名       14. 主文件夹开关&echo.
 echo			5. 单击 打开文件           15. 图库开关&echo.
-echo			6. 双击 打开文件 &echo.
+echo			6. 双击 打开文件           16. 清理图标/缩略图缓存 &echo.
 echo			7. 显示 复选框 &echo.
 echo			8. 隐藏 复选框 &echo.
 echo			9. 显示 系统隐藏文件 &echo.
@@ -622,6 +622,8 @@ if "%a%"=="1" (
 	call :explorer_home_folder_toggle
 ) else if "%a%"=="15" (
 	call :explorer_gallery_toggle
+) else if "%a%"=="16" (
+	call :clear_icon_cache
 )
 if "%a%"=="0" exit /b
 if /i "%a%"=="q" exit /b
@@ -774,6 +776,18 @@ if "%errorlevel%"=="1" (set "v=0" & set "op_name=隐藏") else (set "v=1" & set 
 regedit.exe /s "%GALLERY_TOGGLE_REG%"
 IF EXIST "%GALLERY_TOGGLE_REG%" DEL "%GALLERY_TOGGLE_REG%"
 call :sleep "已设置图库 %op_name% ，请重新打开资源管理器查看效果" 10
+exit /b
+
+:: 清理图标/缩略图缓存 
+:clear_icon_cache
+taskkill /f /im explorer.exe >nul 2>&1
+echo 正在删除图标缓存...
+del /f /s /q "%localappdata%\IconCache.db" >nul 2>&1
+del /f /s /q "%localappdata%\Microsoft\Windows\Explorer\iconcache*" >nul 2>&1
+echo 正在清理缩略图缓存...
+del /f /s /q "%localappdata%\Microsoft\Windows\Explorer\thumbcache_*" >nul 2>&1
+call :restart_explorer
+call :sleep "清理完成" 6
 exit /b
 
 :: 下载 Windows
@@ -1046,44 +1060,50 @@ endlocal & exit /b
 explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}
 exit /b
 
-:: 预装应用管理
-:pre_installed_app
+:: 应用管理
+:app_setting
 call :reset_color_size
-call :print_title "预装应用管理"
+call :print_title "应用管理"
 set "a="
 call :print_separator
 echo				1. 一键卸载预装应用 &echo.
 echo				2. 打开程序和功能 &echo.
-echo				3. 卸载OneDrive &echo.
-echo				4. 安装OneDrive &echo.
+echo				3. OneDrive安装/卸载 &echo.
+echo				4. 微软拼音输入法设置 &echo.
+echo				5. 安装应用[待开发] &echo.
 echo				0. 返回(q) &echo.
 call :print_separator
-where winget >nul 2>&1
-if errorlevel 1 (
-    echo 未找到winget程序，此功能暂不可用，你可以安装后再尝试
-    echo https://apps.microsoft.com/store/detail/9NBLGGH4NNS1 & pause>nul
-	exit /b
-)
 set /p a=请输入你的选择: 
 if "%a%"=="1" (
 	call :uninstall_preinstalled_apps
 )else if "%a%"=="2" (
 	start "" appwiz.cpl
 )else if "%a%"=="3" (
-	echo 卸载 OneDrive...
-	call :uninstall_OneDrive
-	call :sleep "OneDrive 已卸载！" 4
+	choice /c 123 /n /m "OneDrive应用? [1.卸载 2.安装 3.取消]: "
+	set /a op=!errorlevel!
+	if !op! == 1 call :uninstall_OneDrive
+	if !op! == 2 call :install_OneDrive
+	if !op! == 3 goto :app_setting
 )else if "%a%"=="4" (
-	echo 正在安装 OneDrive...
-	call :install_OneDrive
-	call :sleep "OneDrive 已安装！" 4
+	call :microsoft_pinyin
 )
 if "%a%"=="0" exit /b
 if /i "%a%"=="q" exit /b
-goto pre_installed_app
+goto app_setting
+
+:check_winget
+where winget >nul 2>&1
+if errorlevel 1 (
+    echo 未找到 winget 程序，此功能暂不可用，请先安装 winget。
+    echo https://apps.microsoft.com/store/detail/9NBLGGH4NNS1 & pause>nul
+    exit /b 1
+)
+exit /b 0
 
 ::卸载预装应用
 :uninstall_preinstalled_apps
+call :check_winget
+if errorlevel 1 exit /b
 echo	预装的应用包括：
 echo		Microsoft 365 Copilot
 echo		Microsoft Clipchamp
@@ -1135,6 +1155,7 @@ exit /b
 
 :: 卸载OneDrive
 :uninstall_OneDrive
+echo 正在卸载 OneDrive...
 taskkill /f /im OneDrive.exe >nul 2>&1
 if exist "%SystemRoot%\System32\OneDriveSetup.exe" (
 	"%SystemRoot%\System32\OneDriveSetup.exe" /uninstall
@@ -1148,10 +1169,12 @@ rd /s /q "%ProgramData%\Microsoft OneDrive" >nul 2>&1
 rd /s /q "%SystemDrive%\OneDriveTemp" >nul 2>&1
 reg delete "HKCR\WOW6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >nul 2>&1
 reg delete "HKCR\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >nul 2>&1
+call :sleep "卸载 OneDrive...OK" 5
 exit /b
 
 :: 安装OneDrive
 :install_OneDrive
+echo 正在安装 OneDrive...
 if exist "%SystemRoot%\System32\OneDriveSetup.exe" (
 	"%SystemRoot%\System32\OneDriveSetup.exe"
 ) else if exist "%SystemRoot%\SysWOW64\OneDriveSetup.exe" (
@@ -1160,6 +1183,54 @@ if exist "%SystemRoot%\System32\OneDriveSetup.exe" (
 	call :sleep "找不到 OneDrive 安装程序，请手动下载安装！" 4 silent
 	start "" https://www.microsoft.com/zh-cn/microsoft-365/onedrive/download
 )
+call :sleep "已经完成" 5
+exit /b
+
+:: 微软拼音输入法设置 
+:microsoft_pinyin
+call :print_title "微软拼音输入法设置"
+set "d="
+call :print_separator
+echo				1. 双拼输入 &echo.
+echo				2. 全拼输入 &echo.
+echo				3. 打开微软拼音设置 &echo.
+echo				0. 返回(q) &echo.
+call :print_separator "~"
+echo  该设置仅用于【微软拼音输入法】，其他输入法请勿使用。 
+call :print_separator
+echo.
+set /p "d=请输入你的选择: "
+if "%d%"=="1" (
+	echo.&echo		可选双拼方案： 
+	echo				1. 软微双拼 
+	echo				2. 智能ABC 
+	echo				3. 自然码 
+	choice /c 123 /n /m "请输入双拼方案: " 
+	set /a sp_option=!errorlevel!
+	if !sp_option! == 1 set "sp_code=0"
+	if !sp_option! == 2 set "sp_code=1"
+	if !sp_option! == 3 set "sp_code=3"
+	call :microsoft_pinyin_select 1
+	call :microsoft_pinyin_sp !sp_code!
+	call :sleep "已设置双拼输入法" 6
+)else if "%d%"=="2" (
+	call :microsoft_pinyin_select 0
+	call :sleep "已设置全拼输入法" 6
+)else if "%d%"=="3" (
+	start ms-settings:regionlanguage-chsime-pinyin
+)
+if "%d%"=="0" endlocal & exit /b
+if /i "%d%"=="q" endlocal & exit /b
+goto :microsoft_pinyin
+
+:: 双拼输入法 0软微双拼 1智能ABC 3自然码 
+:microsoft_pinyin_sp
+reg add "HKCU\Software\Microsoft\InputMethod\Settings\CHS" /v DoublePinyinScheme /t REG_DWORD /d %~1 /f >nul 2>&1
+exit /b
+
+:: 输入法 1双拼 0全拼
+:microsoft_pinyin_select
+reg add "HKCU\Software\Microsoft\InputMethod\Settings\CHS" /v "Enable Double Pinyin" /t REG_DWORD /d %~1 /f >nul 2>&1
 exit /b
 
 :: 编辑hosts 
@@ -1175,13 +1246,13 @@ call :print_separator
 echo			1. 网络信息                  11. 远程桌面 &echo.
 echo			2. 打开网络连接控制面板      12. 一键断网/联网 &echo.
 echo			3. 清除DNS缓存               13. 防火墙设置 &echo.
-echo			4. ping检查 &echo.
-echo			5. tracert路由追踪 &echo.
-echo			6. 我的外网IP &echo.
-echo			7. 检查端口占用 &echo.
-echo			8. 测速网 &echo.
-echo			9. 安装telnet客户端 &echo.
-echo			10. telehack.com&echo.
+echo			4. MAC地址                   14. 代理设置[待开发] &echo.
+echo			5. ping检查                  15. 端口转发[待开发]&echo.
+echo			6. tracert路由追踪 &echo.
+echo			7. 我的外网IP &echo.
+echo			8. 检查端口占用 &echo.
+echo			9. 测速网 &echo.
+echo			10. telnet设置&echo.
 echo			0. 返回(q) &echo.
 call :print_separator
 set /p "a=请输入你的选择: "
@@ -1194,36 +1265,37 @@ if "%a%"=="1" (
 	ipconfig /flushdns
 	call :sleep " " 4
 ) else if "%a%"=="4" (
-    echo.
-    set "ping_target="
-    set /p "ping_target=请输入要ping的IP或域名[默认: baidu.com]: "
-    if "!ping_target!"=="" set "ping_target=baidu.com"
+	echo.
+	getmac /v & pause
+) else if "%a%"=="5" (
+	echo.
+	set "ping_target="
+	set /p "ping_target=请输入要ping的IP或域名[默认: baidu.com]: "
+	if "!ping_target!"=="" set "ping_target=baidu.com"
 	call :ask_confirm "是否持续检查? [y/N]: " n
 	if errorlevel 1 (
 		set "ping_cmd=ping !ping_target! -t"
 	) else (
 		set "ping_cmd=ping !ping_target! -n 4"
 	)
-    start "Ping检查: !ping_target!" cmd /k "!ping_cmd!"
-) else if "%a%"=="5" (
-    echo.
-    set "trace_target="
-    set /p "trace_target=请输入要追踪的IP或域名[默认: baidu.com]: "
-    if "!trace_target!"=="" set "trace_target=baidu.com"
-    start "路由追踪: !trace_target!" cmd /k "tracert !trace_target!"
+	start "Ping检查: !ping_target!" cmd /k "!ping_cmd!"
 ) else if "%a%"=="6" (
+	echo.
+	set "trace_target="
+	set /p "trace_target=请输入要追踪的IP或域名[默认: baidu.com]: "
+	if "!trace_target!"=="" set "trace_target=baidu.com"
+	start "路由追踪: !trace_target!" cmd /k "tracert !trace_target!"
+) else if "%a%"=="7" (
 	echo.
 	curl.exe -s -L --connect-timeout 5 --max-time 10 https://myip.ipip.net/
 	echo https://myip.ipip.net 提供服务支持 & pause
-) else if "%a%"=="7" (
+) else if "%a%"=="8" (
 	call :search_port
 	call :sleep "end.." 5
-) else if "%a%"=="8" (
-	start "" https://www.speedtest.cn/
 ) else if "%a%"=="9" (
-	call :install_telnet
+	start "" https://www.speedtest.cn/
 ) else if "%a%"=="10" (
-	call :start_telehack
+	call :telnet_setting
 ) else if "%a%"=="11" (
 	call :remote_desktop
 	call :sleep "远程桌面设置成功" 5
@@ -1271,6 +1343,26 @@ if /i "!K_KILL!"=="Y" (
     taskkill /PID %K_PID% /F
 )
 exit /b
+
+
+:telnet_setting
+setlocal enabledelayedexpansion
+call :print_title "telnet设置"
+set "a="
+call :print_separator
+echo			1. 安装telnet客户端 &echo.
+echo			2. telehack.com&echo.
+echo			0. 返回(q) &echo.
+call :print_separator
+set /p "a=请输入你的选择: "
+if "%a%"=="1" (
+	call :install_telnet
+) else if "%a%"=="2" (
+	call :start_telehack
+)
+if "%a%"=="0" endlocal & exit /b
+if /i "%a%"=="q" endlocal &  exit /b
+goto :telnet_setting 
 
 :: 安装telnet客户端 
 :install_telnet
@@ -1365,55 +1457,6 @@ goto :device_setting
 :toggle_device_status
 set "device=%~1" & set "%opt%=%~2"
 powershell.exe -nologo -noprofile -Command "$ProgressPreference = 'SilentlyContinue';Get-PnpDevice -Class %device% | %opt%-PnpDevice -Confirm:$false" >nul 2>&1
-exit /b
-
-:: 微软拼音输入法设置 
-:microsoft_pinyin
-setlocal enabledelayedexpansion
-call :print_title "微软拼音输入法设置"
-set "a="
-call :print_separator
-echo				1. 双拼输入 &echo.
-echo				2. 全拼输入 &echo.
-echo				3. 打开微软拼音设置 &echo.
-echo				0. 返回(q) &echo.
-call :print_separator "~"
-echo  该设置仅用于【微软拼音输入法】，其他输入法请勿使用。 
-call :print_separator
-echo.
-set /p "a=请输入你的选择: "
-if "%a%"=="1" (
-	echo.&echo		可选双拼方案： 
-	echo				1. 软微双拼 
-	echo				2. 智能ABC 
-	echo				3. 自然码 
-	choice /c 123 /n /m "请输入双拼方案: " 
-	set /a sp_option=!errorlevel!
-	if !sp_option! == 1 set "sp_code=0"
-	if !sp_option! == 2 set "sp_code=1"
-	if !sp_option! == 3 set "sp_code=3"
-	call :microsoft_pinyin_select 1
-	call :microsoft_pinyin_sp !sp_code!
-	call :sleep "已设置双拼输入法" 6
-)else if "%a%"=="2" (
-	call :microsoft_pinyin_select 0
-	call :sleep "已设置全拼输入法" 6
-)else if "%a%"=="3" (
-	start ms-settings:regionlanguage-chsime-pinyin
-)
-if "%a%"=="0" endlocal & exit /b
-if /i "%a%"=="q" endlocal & exit /b
-endlocal
-goto :microsoft_pinyin
-
-:: 双拼输入法 0软微双拼 1智能ABC 3自然码 
-:microsoft_pinyin_sp
-reg add "HKCU\Software\Microsoft\InputMethod\Settings\CHS" /v DoublePinyinScheme /t REG_DWORD /d %~1 /f >nul 2>&1
-exit /b
-
-:: 输入法 1双拼 0全拼
-:microsoft_pinyin_select
-reg add "HKCU\Software\Microsoft\InputMethod\Settings\CHS" /v "Enable Double Pinyin" /t REG_DWORD /d %~1 /f >nul 2>&1
 exit /b
 
 :: 图一乐 
