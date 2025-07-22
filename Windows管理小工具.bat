@@ -928,9 +928,10 @@ goto windows_update
 call :print_title "UAC（用户账户控制）设置"
 set "a=" 
 call :print_separator
-echo				1. 从不通知（静默模式，推荐开发调试） &echo.
-echo				2. 恢复默认（推荐普通用户） &echo.
-echo				3. 彻底关闭（EnableLUA=0，需重启，UWP不可用） &echo.
+echo				1. 从不通知 &echo.
+echo				2. 恢复默认 &echo.
+echo				3. UAC开启/关闭 &echo.
+echo				4. 打开UAC手动设置 &echo.
 echo				0. 返回(q) &echo.
 call :print_separator
 set /p a=请输入你的选择: 
@@ -940,24 +941,45 @@ if "%a%"=="1" (
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 0 /f >nul 2>&1
 	call :sleep "完成！" 3
 ) else if "%a%"=="2" (
-	echo 正在恢复默认设置... 
+	call :uac_toggle 1
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 5 /f >nul 2>&1
 	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v PromptOnSecureDesktop /t REG_DWORD /d 1 /f >nul 2>&1
 	call :sleep "完成！" 3
 ) else if "%a%"=="3" (
-	echo 正在彻底关闭 UAC... 
-	reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f >nul 2>&1
-	call :sleep "设置完成！请重启系统以生效。 " 5
+	choice /c 123 /n /m "选择你的操作? [1.彻底关闭 2.启用 3.取消]: "
+	if "!errorlevel!"=="3" goto :uac_setting
+	if "!errorlevel!"=="1" (
+		call :ask_confirm "彻底关闭UAC会造成系统的不稳定，你要继续关闭吗? [y/N]: " n
+		if "!errorlevel!" == "0" goto :uac_setting
+		call :ask_confirm "你需要承担可能的风险，确定继续关闭吗? [y/N]: " n
+		if "!errorlevel!" == "0" goto :uac_setting
+		echo 正在彻底关闭 UAC... 
+		call :uac_toggle 0
+		call :ask_confirm "设置完成，重启系统以生效。 现在重启吗? [y/N]: " n
+		if "!errorlevel!" == "1" (shutdown /r /t 0)
+	) else if "!errorlevel!"=="2" (
+		echo 正在开启 UAC... 
+		call :uac_toggle 1
+		call :ask_confirm "设置完成，重启系统以生效。 现在重启吗? [y/N]: " n
+		if "!errorlevel!" == "1" (shutdown /r /t 0)
+	)
+) else if "%a%"=="4" (
+	UserAccountControlSettings.exe
 )
 if "%a%"=="0" exit /b
 if /i "%a%"=="q" exit /b
-goto uac_setting
+goto :uac_setting
+
+:: UAC开关 0:关闭 1开启 
+:uac_toggle
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d %~1 /f >nul 2>&1
+exit /b
 
 :: WIFI密码
 :wifi_password
 call :print_title "WIFI密码"
 setlocal
-echo 获取系统连接过的WIFI账号和密码
+echo 	获取系统连接过的WIFI名称和密码
 call :print_separator
 for /f "tokens=2 delims=:" %%i in ('netsh wlan show profiles ^| findstr "All User Profile"') do (
 	set "ssid=%%i"
@@ -968,10 +990,10 @@ for /f "tokens=2 delims=:" %%i in ('netsh wlan show profiles ^| findstr "All Use
 		set "password=!password:~1!" 
 	)
 	set "output=!ssid!                         " 
-	echo !output:~0,20! !password!
+	echo 	!output:~0,20! !password!
 )
 call :print_separator
-echo 获取完毕,按键任意键继续 & pause>nul
+call :wait_keydown
 endlocal & exit /b
 
 :: 上帝模式
@@ -1068,9 +1090,9 @@ set "a="
 call :print_separator
 echo				1. 一键卸载预装应用 &echo.
 echo				2. 打开程序和功能 &echo.
-echo				3. OneDrive安装/卸载 &echo.
-echo				4. 微软拼音输入法设置 &echo.
-echo				5. 安装应用[待开发] &echo.
+echo				3. 高级winget应用管理 &echo.
+echo				4. OneDrive安装/卸载 &echo.
+echo				5. 微软拼音输入法设置 &echo.
 echo				0. 返回(q) &echo.
 call :print_separator
 set /p a=请输入你的选择: 
@@ -1079,12 +1101,14 @@ if "%a%"=="1" (
 )else if "%a%"=="2" (
 	start "" appwiz.cpl
 )else if "%a%"=="3" (
+	call :winget_app
+)else if "%a%"=="4" (
 	choice /c 123 /n /m "OneDrive应用? [1.卸载 2.安装 3.取消]: "
 	set /a op=!errorlevel!
 	if !op! == 1 call :uninstall_OneDrive
 	if !op! == 2 call :install_OneDrive
 	if !op! == 3 goto :app_setting
-)else if "%a%"=="4" (
+)else if "%a%"=="5" (
 	call :microsoft_pinyin
 )
 if "%a%"=="0" exit /b
@@ -1094,9 +1118,9 @@ goto app_setting
 :check_winget
 where winget >nul 2>&1
 if errorlevel 1 (
-    echo 未找到 winget 程序，此功能暂不可用，请先安装 winget。
-    echo https://apps.microsoft.com/store/detail/9NBLGGH4NNS1 & pause>nul
-    exit /b 1
+	echo 未找到 winget 程序，此功能暂不可用，请先安装 winget。
+	call :wait_keydown "https://apps.microsoft.com/store/detail/9NBLGGH4NNS1"
+	exit /b 1
 )
 exit /b 0
 
@@ -1151,6 +1175,104 @@ echo 正在卸载Outlook for Windows
 winget uninstall "Outlook for Windows"
 call :widgets_uninstall
 echo 卸载预装应用完成 & timeout /t 4
+exit /b
+
+:: 高级winget应用管理 
+:winget_app
+call :check_winget
+if errorlevel 1 exit /b
+call :reset_color
+call :print_title "高级winget应用管理"
+set "d="
+call :print_separator
+echo				1. 搜索应用 &echo.
+echo				2. 安装应用 &echo.
+echo				3. 查看已安装 &echo.
+echo				4. 更新 &echo.
+echo				5. 卸载 &echo.
+echo				0. 返回(q) &echo.
+call :print_separator
+echo	本功能使用winget进行应用的管理
+echo	https://learn.microsoft.com/zh-cn/windows/package-manager/winget/ &echo.
+call :print_separator
+set /p "d=请输入你的选择: "
+if "%d%"=="1" (
+	call :winget_search
+) else if "%d%"=="2" (
+	call :winget_install
+) else if "%d%"=="3" (
+	set "command_line=winget list"
+	start "!command_line!" /max cmd /k "!command_line!"
+) else if "%d%"=="4" (
+	call :winget_upgrade
+) else if "%d%"=="5" (
+	call :winget_uninstall
+) 
+if "%d%"=="0" exit /b
+if /i "%d%"=="q" exit /b
+goto :winget_app 
+
+:: winget搜索应用 
+:winget_search
+set /p "app_name=请输入要搜索的应用关键词（例如 微信）: "
+set "command_line=winget search !app_name!"
+start "!command_line!" cmd /k "!command_line! -s winget"
+exit /b
+
+:: winget安装应用 
+:winget_install
+call :ask_confirm "根据搜索结果id安装应用，是否继续? [Y/n]: " y
+if errorlevel 1 goto :winget_app
+echo.
+:winget_intstall_input_id
+echo 输入需要安装的应用id，如果有多个应用使用空格分割（例如 Tencent.WeChat） 
+set /p "app_ids=你要安装的应用是? : "
+if not defined app_ids (echo 请重新输入 & goto :winget_intstall_input_id)
+set "install_location="
+if /i "%SystemDrive%"=="C:" if exist "D:\" set "install_location=D:\apps"
+echo.
+if defined install_location (
+	echo 如果可以，我会为你安装在!install_location! ，当然这取决应用是否支持修改路径。
+) else (
+	echo 我会安装在系统默认位置。
+)
+choice /c 123 /n /m "是否同意? [1.好的 2.应用默认安装位置 3. 自定义位置]: "
+if "!errorlevel!"=="2" (
+	set "install_location="
+) else if "!errorlevel!"=="3" (
+	set /p "install_location=请输入安装的位置（例如 D:\apps）: "
+)
+if defined install_location if not exist "!install_location!\" mkdir "!install_location!"
+cls
+for %%i in (%app_ids%) do (
+	winget install --id "%%i" -e -l "!install_location!" -s winget --accept-source-agreements --accept-package-agreements
+)
+call :wait_keydown "安装结束，按任意键继续"
+call :reset_color
+exit /b
+
+:: winget升级应用 
+:winget_upgrade 
+choice /c 123 /n /m "更新选项? [1.更新所有 2.更新指定应用 3.取消]: "
+if "!errorlevel!"=="3" exit /b
+if "!errorlevel!"=="1" (
+	winget upgrade --all
+) else if "!errorlevel!"=="2" (
+	set /p "app_id=输入需要更新的应用id（例如 Tencent.WeChat）: "
+	winget upgrade !app_id!
+)
+call :sleep "更新完成" 10
+call :reset_color
+exit /b
+
+:: winget卸载应用 
+:winget_uninstall 
+choice /c 12 /n /m "卸载应用吗? [1.是的 2.取消]: "
+if "!errorlevel!"=="2" exit /b
+set /p "app_id=输入需要卸载的应用id（例如 Tencent.WeChat）: "
+winget uninstall !app_id!
+call :sleep "卸载完成" 10
+call :reset_color
 exit /b
 
 :: 卸载OneDrive
@@ -1246,7 +1368,7 @@ call :print_separator
 echo			1. 网络信息                  11. 远程桌面 &echo.
 echo			2. 打开网络连接控制面板      12. 一键断网/联网 &echo.
 echo			3. 清除DNS缓存               13. 防火墙设置 &echo.
-echo			4. MAC地址                   14. 代理设置[待开发] &echo.
+echo			4. MAC地址                   14. 系统代理设置 &echo.
 echo			5. ping检查                  15. 端口转发[待开发]&echo.
 echo			6. tracert路由追踪 &echo.
 echo			7. 我的外网IP &echo.
@@ -1305,8 +1427,11 @@ if "%a%"=="1" (
 	call :sleep "已设置!net_status!！" 5
 ) else if "%a%"=="13" (
 	call :advfirewall_setting
+) else if "%a%"=="14" (
+	call :system_proxy
+) else if "%a%"=="15" (
+	call :sleep "待开发"
 )
-
 if "%a%"=="0" endlocal & exit /b
 if /i "%a%"=="q" endlocal &  exit /b
 goto :network_setting 
@@ -1380,7 +1505,7 @@ exit /b
 :start_telehack
 echo. & echo Telehack是ARPANET和Usenet的风格化界面的在线模拟，于2010年匿名创建。它是一个完整的多用户模拟，包括26,600+模拟主机，其文件时间跨度为1985年至1990年。 
 echo.
-echo 回车开始 & pause>nul
+call :wait_keydown "回车开始"
 start cmd /k "telnet telehack.com"
 exit /b
 
@@ -1421,6 +1546,48 @@ if "%errorlevel%"=="1" (
 )
 exit /b
 
+:: 系统代理 
+:system_proxy
+call :print_title "系统代理设置"
+set "sp="
+set "system_proxy_reg_location=HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
+call :print_separator
+echo				1. 设置代理 &echo.
+echo				2. 关闭代理 &echo.
+echo				3. 当前状态 &echo.
+echo				4. 打开系统代理设置界面 &echo.
+echo				0. 返回(q) &echo.
+call :print_separator
+set /p "sp=请输入你的选择: "
+if "%sp%"=="1" ( 
+	set /p proxy_ip_port="请输入代理服务器地址及端口（例如 127.0.0.1:8099）: "
+	set proxy_ip_port=!proxy_ip_port:：=:!
+	echo.
+	echo 正在设置代理 !proxy_ip_port! ...
+	reg add "!system_proxy_reg_location!" /v ProxyEnable /t REG_DWORD /d 1 /f >nul
+	reg add "!system_proxy_reg_location!" /v ProxyServer /t REG_SZ /d "!proxy_ip_port!" /f >nul
+	call :sleep "代理已设置为 !proxy_ip_port!" 5
+) else if "%sp%"=="2" (
+	reg add "!system_proxy_reg_location!" /v ProxyEnable /t REG_DWORD /d 0 /f >nul
+	reg delete "!system_proxy_reg_location!" /v ProxyServer /f >nul 2>nul
+	call :sleep "代理已关闭" 3
+) else if "%sp%"=="3" (
+	call :read_reg_value "!system_proxy_reg_location!" "ProxyEnable"
+	if "!ret_value!"=="0x1" (
+		echo 代理启用状态: 已启用
+		call :read_reg_value "!system_proxy_reg_location!" "ProxyServer"
+		echo 当前代理服务器: !ret_value!
+	) else if "!ret_value!"=="0x0" (
+		echo 代理启用状态: 已关闭 
+	) else echo 无法读取代理状态（可能未设置） 
+	pause
+) else if "%sp%"=="4" (
+	start ms-settings:network-proxy
+)
+if "%sp%"=="0" exit /b
+if /i "%sp%"=="q" exit /b
+goto :system_proxy
+
 :: 设备管理 
 :device_setting
 setlocal enabledelayedexpansion
@@ -1431,21 +1598,22 @@ echo				1. 照相机 &echo.
 echo				2. 蓝牙 &echo.
 echo				0. 返回(q) &echo.
 echo.
-call :print_separator "~"
+call :print_separator "~" 
 echo    通过禁用或开启对应功能来保护系统安全。
 call :print_separator
 set /p "c=请选择你要管理的设备: "
 if not defined c goto :device_setting
 if "%c%"=="0" endlocal & exit /b
 if /i "%c%"=="q" endlocal & exit /b
-choice /c 12 /n /m "选择你的操作? [1.禁用 2.启用]: "
+choice /c 123 /n /m "选择你的操作? [1.禁用 2.启用 3.取消]: "
+if "%errorlevel%"=="3" goto :device_setting
 if "%errorlevel%"=="1" (set "opt=Disable" & set "opt_cn=禁用") else (set "opt=Enable" & set "opt_cn=启用")
 if "%c%"=="1" (
-	call :toggle_device_status "Camera" %opt%
-	call :toggle_device_status "Image" %opt%
+	call :device_status_toggle "Camera" %opt%
+	call :device_status_toggle "Image" %opt%
 	set "device_name=照相机"
 )else if "%c%"=="2" (
-	call :toggle_device_status "Bluetooth" %opt%
+	call :device_status_toggle "Bluetooth" %opt%
 	set "device_name=蓝牙"
 )
 if defined device_name call :sleep "已%opt_cn%%device_name%" 5
@@ -1454,7 +1622,7 @@ goto :device_setting
 :: 设备状态切换
 :: 参数1：设备，如Camera
 :: 参数2：操作，如Disable、Enable 
-:toggle_device_status
+:device_status_toggle
 set "device=%~1" & set "%opt%=%~2"
 powershell.exe -nologo -noprofile -Command "$ProgressPreference = 'SilentlyContinue';Get-PnpDevice -Class %device% | %opt%-PnpDevice -Confirm:$false" >nul 2>&1
 exit /b
@@ -1566,7 +1734,7 @@ echo			│                             │                            │
 echo			└─────────────────────────────┴────────────────────────────┘ 
 echo.
 if not defined remote_updated (
-	call :sleep "无法获取远程更新日期，放弃更新。" 5
+	call :sleep "无法获取远程更新日期，请检查网络设置或到更新地址手动下载。" 5
 	exit /b
 )
 if %remote_updated% LEQ %updated% (
@@ -1629,7 +1797,7 @@ exit /b
 :: 参数1：分隔符字符，默认 *
 :: 参数2：重复次数，默认为窗口宽度 
 :print_separator
-setlocal ENABLEDELAYEDEXPANSION
+setlocal
 set "char=%~1" 
 if "%char%"=="" set "char=%separator%"
 set "count=%~2"
@@ -1657,10 +1825,23 @@ echo !space_str!!title!
 echo.
 endlocal & exit /b
 
+:: 重启资源管理器 
 :restart_explorer
 taskkill /f /im explorer.exe >nul 2>&1 & start explorer & exit /b
 
-:: 选择询问 如果选了默认值，errorlevel是0，否则是1
+:: 读取注册表键值 
+:: 参数1=注册表路径，参数2=值名称 
+:: 返回值：ret_value 
+:read_reg_value
+set "ret_value="
+set "reg_cmd=reg query "%~1" /v "%~2" 2^>nul ^| findstr /I /C:"%~2""
+for /f "tokens=1,2,*" %%G in ('%reg_cmd%') do (
+	set "ret_value=%%I"
+)
+exit /b
+
+:: 询问选择 
+:: 如果选了默认值，errorlevel是0，否则是1 
 :: 参数1：提示信息 
 :: 参数2：默认值 
 :ask_confirm
@@ -1670,7 +1851,7 @@ set /p "input=%~1"
 if not defined input set "input=%~2"
 if /i "%input%"=="%~2" (endlocal & exit /b 0) else (endlocal & exit /b 1)
 
-:: 等待一会儿再继续 
+:: 等待后运行 
 :: 参数1：提示信息(默认"请稍候...") 
 :: 参数2：等待时间(默认1s) 
 :: 参数3：可选silent，是否静默等待（默认显示倒计时） 
@@ -1687,12 +1868,28 @@ if /i "%silent%"=="silent" (
 )
 endlocal & exit /b
 
+:: 等待按键后继续 
+:wait_keydown
+if "%~1" neq "" (echo %~1 & pause >nul) else (echo 按任意键继续 & pause >nul)
+exit /b
+
+:: 重启系统 
+:restart_system
+shutdown /r /t 0 & exit /b
+
 :: 设置颜色和窗口大小 
 :reset_color_size
-color %color%
+call :reset_color
+call :reset_size
+exit /b
+
+:reset_color
+color %color% &  exit /b
+
+:reset_size
 mode con cols=%cols% lines=%lines%
 exit /b
 
+:: 程序退出 
 :byebye
-call :sleep "byebye" 1 silent
-exit
+call :sleep "byebye" 1 silent & exit
