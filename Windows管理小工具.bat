@@ -7,8 +7,8 @@ shift && cd /d "%~dp0"
 :: 一些配置参数 
 set "color=0A"
 set "title=Windows管理小工具"
-set "updated=20250715"
-set "rversion=v2.1.4"
+set "updated=20250722"
+set "rversion=v2.1.5"
 set "cols=100"
 set "lines=40"
 set "separator=="
@@ -856,7 +856,7 @@ echo			3. 暂停更新1000周* &echo.
 echo			4. 暂停更新5周（默认） &echo.
 echo			0. 返回(q) &echo.
 call :print_separator "."
-echo		建议选暂停更新1000周，影响较小。
+echo		建议选暂停更新1000周，影响较小。&echo.
 call :print_separator
 echo.
 set /p a=请输入你的选择: 
@@ -1014,7 +1014,7 @@ echo				5. 启用休眠 &echo.
 echo				0. 返回(q) &echo.
 call :print_separator "~"
 echo 睡眠：保持内存通电，快速恢复(耗电少) 
-echo 休眠：将内存数据保存到硬盘 hiberfil.sys 后完全关机(零耗电) 
+echo 休眠：将内存数据保存到硬盘 hiberfil.sys 后完全关机(零耗电) &echo.
 call :print_separator
 echo.
 set /p a=请输入你的选择: 
@@ -1369,7 +1369,7 @@ echo			1. 网络信息                  11. 远程桌面 &echo.
 echo			2. 打开网络连接控制面板      12. 一键断网/联网 &echo.
 echo			3. 清除DNS缓存               13. 防火墙设置 &echo.
 echo			4. MAC地址                   14. 系统代理设置 &echo.
-echo			5. ping检查                  15. 端口转发[待开发]&echo.
+echo			5. ping检查                  15. 端口转发&echo.
 echo			6. tracert路由追踪 &echo.
 echo			7. 我的外网IP &echo.
 echo			8. 检查端口占用 &echo.
@@ -1420,7 +1420,6 @@ if "%a%"=="1" (
 	call :telnet_setting
 ) else if "%a%"=="11" (
 	call :remote_desktop
-	call :sleep "远程桌面设置成功" 5
 ) else if "%a%"=="12" (
 	call :internet_control
 	if "!errorlevel!"=="1" (set "net_status=断网") else (set "net_status=联网")
@@ -1430,7 +1429,7 @@ if "%a%"=="1" (
 ) else if "%a%"=="14" (
 	call :system_proxy
 ) else if "%a%"=="15" (
-	call :sleep "待开发"
+	call :port_forward
 )
 if "%a%"=="0" endlocal & exit /b
 if /i "%a%"=="q" endlocal &  exit /b
@@ -1469,7 +1468,7 @@ if /i "!K_KILL!"=="Y" (
 )
 exit /b
 
-
+:: telnet设置 
 :telnet_setting
 setlocal enabledelayedexpansion
 call :print_title "telnet设置"
@@ -1512,9 +1511,11 @@ exit /b
 :: 远程桌面 
 :remote_desktop
 setlocal
-choice /c 12 /n /m "远程桌面设置? [1.启用 2.关闭]: "
+choice /c 123 /n /m "远程桌面设置? [1.启用 2.关闭 3.返回]: "
+if "%errorlevel%"=="3" exit /b
 if "%errorlevel%"=="1" (set "value=0") else ( set "value=1")
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d %value% /f
+call :sleep "远程桌面设置成功" 5
 endlocal & exit /b
 
 :: 一键联网控制 
@@ -1566,10 +1567,12 @@ if "%sp%"=="1" (
 	echo 正在设置代理 !proxy_ip_port! ...
 	reg add "!system_proxy_reg_location!" /v ProxyEnable /t REG_DWORD /d 1 /f >nul
 	reg add "!system_proxy_reg_location!" /v ProxyServer /t REG_SZ /d "!proxy_ip_port!" /f >nul
+	reg add "!system_proxy_reg_location!" /v ProxyOverride /t REG_SZ /d "<local>" /f >nul
 	call :sleep "代理已设置为 !proxy_ip_port!" 5
 ) else if "%sp%"=="2" (
 	reg add "!system_proxy_reg_location!" /v ProxyEnable /t REG_DWORD /d 0 /f >nul
 	reg delete "!system_proxy_reg_location!" /v ProxyServer /f >nul 2>nul
+	reg add "!system_proxy_reg_location!" /v ProxyOverride /t REG_SZ /d "" /f >nul
 	call :sleep "代理已关闭" 3
 ) else if "%sp%"=="3" (
 	call :read_reg_value "!system_proxy_reg_location!" "ProxyEnable"
@@ -1588,18 +1591,58 @@ if "%sp%"=="0" exit /b
 if /i "%sp%"=="q" exit /b
 goto :system_proxy
 
+:: 端口转发 
+:port_forward
+call :print_title "端口转发"
+set "pf="
+call :print_separator
+echo				1. 添加端口转发规则 &echo.
+echo				2. 删除端口转发规则 &echo.
+echo				3. 查看当前规则 &echo.
+echo				4. 清空所有规则 &echo.
+echo				0. 返回(q) &echo.
+call :print_separator
+set /p "pf=请输入你的选择: "
+if "%pf%"=="1" (
+	echo 添加端口转发规则...&echo.
+	set /p "listen_ip_port=请输入监听IP地址及端口(例如：127.0.0.1:8999):"
+	set /p "connect_ip_port=请输入目标IP地址及端口(例如：127.0.0.1:8080):"
+	set "listen_ip_port=!listen_ip_port:： =:!"
+	set "connect_ip_port=!connect_ip_port:： =:!"
+	for /f "tokens=1,2 delims=:" %%a in ("!listen_ip_port!") do (set "listen_ip=%%a" & set "listen_port=%%b")
+	for /f "tokens=1,2 delims=:" %%a in ("!connect_ip_port!") do (set "connect_ip=%%a" & set "connect_port=%%b")
+	netsh interface portproxy add v4tov4 listenaddress=!listen_ip! listenport=!listen_port! connectaddress=!connect_ip! connectport=!connect_port!
+	call :sleep "添加完成" 10
+) else if "%pf%"=="2" (
+	echo 删除端口转发规则...&echo.
+	set /p "listen_ip_port=请输入要删除的监听IP地址及端口(例如：127.0.0.1:8999):"
+	set "listen_ip_port=!listen_ip_port:： =:!"
+	for /f "tokens=1,2 delims=:" %%a in ("!listen_ip_port!") do (set "listen_ip=%%a" & set "listen_port=%%b")
+	netsh interface portproxy delete v4tov4 listenaddress=!listen_ip! listenport=!listen_port!
+	call :sleep "删除完成" 10
+) else if "%pf%"=="3" (
+	echo 当前转发规则 
+	netsh interface portproxy show all
+	call :wait_keydown "按任意键继续"
+) else if "%pf%"=="4" (
+	netsh interface portproxy reset
+	call :wait_keydown "规则已清空，按任意键继续"
+)
+if "%pf%"=="0" exit /b
+if /i "%pf%"=="q" exit /b
+goto :port_forward
+
 :: 设备管理 
 :device_setting
 setlocal enabledelayedexpansion
 call :print_title "设备管理"
 set "c="
 call :print_separator
-echo				1. 照相机 &echo.
-echo				2. 蓝牙 &echo.
+echo				1. 照相机开关 &echo.
+echo				2. 蓝牙开关 &echo.
 echo				0. 返回(q) &echo.
-echo.
 call :print_separator "~" 
-echo    通过禁用或开启对应功能来保护系统安全。
+echo    通过禁用或开启对应功能来保护系统安全。& echo.
 call :print_separator
 set /p "c=请选择你要管理的设备: "
 if not defined c goto :device_setting
