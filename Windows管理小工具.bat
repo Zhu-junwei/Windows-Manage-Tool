@@ -1226,7 +1226,8 @@ if errorlevel 1 goto :winget_app
 echo.
 :winget_intstall_input_id
 echo 输入需要安装的应用id，如果有多个应用使用空格分割（例如 Tencent.WeChat） 
-set /p "app_ids=你要安装的应用是? : "
+set "app_ids="
+set /p "app_ids=你要安装的应用ID是? : "
 if not defined app_ids (echo 请重新输入 & goto :winget_intstall_input_id)
 set "install_location="
 if /i "%SystemDrive%"=="C:" if exist "D:\" set "install_location=D:\apps"
@@ -1237,15 +1238,21 @@ if defined install_location (
 	echo 我会安装在系统默认位置。
 )
 choice /c 123 /n /m "是否同意? [1.好的 2.应用默认安装位置 3. 自定义位置]: "
-if "!errorlevel!"=="2" (
+if %errorlevel%==2 (
 	set "install_location="
-) else if "!errorlevel!"=="3" (
+) else if %errorlevel%==3 (
 	set /p "install_location=请输入安装的位置（例如 D:\apps）: "
 )
-if defined install_location if not exist "!install_location!\" mkdir "!install_location!"
+if defined install_location if not exist "%install_location%\" mkdir "%install_location%"
 cls
 for %%i in (%app_ids%) do (
-	winget install --id "%%i" -e -l "!install_location!" -s winget --accept-source-agreements --accept-package-agreements
+	if defined install_location (
+		echo 正在安装 %%i 到 %install_location%...
+		winget install --id "%%i" -e -l %install_location% -s winget --accept-source-agreements --accept-package-agreements
+	) else (
+		echo 正在安装 %%i 到默认位置...
+		winget install --id "%%i" -e -s winget --accept-source-agreements --accept-package-agreements
+	)
 )
 call :wait_keydown "安装结束，按任意键继续"
 call :reset_color
@@ -1269,7 +1276,9 @@ exit /b
 :winget_uninstall 
 choice /c 12 /n /m "卸载应用吗? [1.是的 2.取消]: "
 if "!errorlevel!"=="2" exit /b
+set "app_id="
 set /p "app_id=输入需要卸载的应用id（例如 Tencent.WeChat）: "
+if not defined app_ids (call :sleep "ID不正确" 5 & exit /b)
 winget uninstall !app_id!
 call :sleep "卸载完成" 10
 call :reset_color
