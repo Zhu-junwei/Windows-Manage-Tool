@@ -7,8 +7,8 @@ shift && cd /d "%~dp0"
 :: 一些配置参数 
 set "color=0A"
 set "title=Windows管理小工具"
-set "updated=20250722"
-set "rversion=v2.1.5"
+set "updated=20250808"
+set "rversion=v2.1.6"
 set "cols=100"
 set "lines=40"
 set "separator=="
@@ -1864,7 +1864,7 @@ echo      https://files.cnblogs.com/files/zjw-blog/WindowsManageTool.sh
 echo.
 echo  特别鸣谢： 
 echo. 
-echo      博客园 批处理之家 吾爱破解 GitHub 蓝奏云 ChatGPT DeepSeek 
+echo      博客园 批处理之家 吾爱破解 致美化 GitHub 蓝奏云 ChatGPT DeepSeek 
 echo.
 call :print_separator
 echo			0. 返回(q)		1. 检查更新 &echo.
