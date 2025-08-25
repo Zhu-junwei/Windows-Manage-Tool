@@ -1445,7 +1445,7 @@ if "%a%"=="1" (
 	set "trace_target="
 	set /p "trace_target=请输入要追踪的IP或域名[默认: baidu.com]: "
 	if "!trace_target!"=="" set "trace_target=baidu.com"
-	start "路由追踪: !trace_target!" cmd /k "tracert !trace_target!"
+	start "路由追踪: !trace_target!" cmd /k "tracert -d -w 1000 !trace_target!"
 ) else if "%a%"=="7" (
 	echo.
 	curl.exe -s -L --connect-timeout 5 --max-time 10 https://myip.ipip.net/
