@@ -1,1 +1,9 @@
+# 所有 .sh 文件强制使用 LF（Linux 脚本）
+*.sh text eol=lf
+
+# 所有 .bat 文件强制使用 CRLF（Windows 脚本）
 *.bat text eol=crlf
+
+# Git 完全不要管理某些文件的行尾，可以用 binary
+# （即 Git 把它当二进制，不会做 LF/CRLF 转换）
+*.bat binary

@@ -12,9 +12,9 @@ set "rversion=v2.1.6"
 set "cols=100"
 set "lines=40"
 set "separator=="
-title %title% %rversion%
+title %title% %rversion% 
 call :reset_color_size
-:: 接收传参来直接调用特定的子程序 
+:: 接收传参来直接调用特定的子程序
 if not "%~1"=="" (call :%~1 & exit)
 
 :: 主菜单 
