@@ -874,28 +874,40 @@ if /i "%a%"=="q" exit /b
 goto activate_windows_office
 exit /b
 
-@REM From https://www.52pojie.cn/thread-1791338-1-1.html
+@REM From https://www.52pojie.cn/thread-1909040-1-1.html
 :: Windows更新设置
 :windows_update
 call :print_title "Windows更新设置"
 set "a="
 call :print_separator
-echo			1. 增加暂停更新1000周选项 &echo.
-echo			2. 恢复暂停更新5周 &echo.
+echo			1. 暂停更新至2999年 &echo.
+echo			2. 恢复更新 &echo.
 echo			0. 返回(q) &echo.
 call :print_separator
 echo.
 set /p a=请输入你的选择: 
 if "%a%"=="1" (
-	echo 暂停更新1000周...
-	reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 7000 /f >nul 2>&1
+	echo 正在暂停更新...
+	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "FlightSettingsMaxPauseDays" /t REG_DWORD /d 7152 /f >nul 2>&1
+	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesStartTime" /t REG_SZ /d "2024-01-01T10:00:52Z" /f >nul 2>&1
+	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesEndTime" /t REG_SZ /d "2999-12-01T09:59:52Z" /f >nul 2>&1
+	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseQualityUpdatesStartTime" /t REG_SZ /d "2024-01-01T10:00:52Z" /f >nul 2>&1
+	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseQualityUpdatesEndTime" /t REG_SZ /d "2999-12-01T09:59:52Z" /f >nul 2>&1
+	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseUpdatesStartTime" /t REG_SZ /d "2024-01-01T09:59:52Z" /f >nul 2>&1
+	reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseUpdatesExpiryTime" /t REG_SZ /d "2999-12-01T09:59:52Z" /f >nul 2>&1
 	start ms-settings:windowsupdate
-	call :sleep "请手动选择暂停更新周期" 5
+	call :sleep "已暂停更新至2999年" 5
 ) else if "%a%"=="2" (
-	echo 恢复默认暂停更新5周...
-	reg add "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v FlightSettingsMaxPauseDays /t reg_dword /d 35 /f >nul 2>&1
+	echo 正在恢复更新...
+	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "FlightSettingsMaxPauseDays" /f >nul 2>&1
+	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesStartTime" /f >nul 2>&1
+	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseFeatureUpdatesEndTime" /f >nul 2>&1
+	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseQualityUpdatesStartTime" /f >nul 2>&1
+	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseQualityUpdatesEndTime" /f >nul 2>&1
+	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseUpdatesStartTime" /f >nul 2>&1
+	reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /v "PauseUpdatesExpiryTime" /f >nul 2>&1
 	start ms-settings:windowsupdate
-	call :sleep "请手动选择暂停更新周期" 5
+	call :sleep "已恢复更新" 5
 )
 if "%a%"=="0" exit /b
 if /i "%a%"=="q" exit /b
