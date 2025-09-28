@@ -28,8 +28,8 @@ echo			2. 桌面设置                      12. 应用管理 &echo.
 echo			3. 任务栏设置                    13. 编辑hosts &echo.
 echo			4. 资源管理器设置                14. 网络管理 &echo.
 echo			5. 下载 Windows ^& Office         15. 设备管理 &echo.
-echo			6. 激活 Windows ^& Office         16. 图一乐 &echo.
-echo			7. Windows更新设置                &echo.
+echo			6. 激活 Windows ^& Office         16. hash计算 &echo.
+echo			7. Windows更新设置               17.图一乐 &echo.
 echo			8. UAC（用户账户控制）设置 &echo.
 echo			9. 上帝模式 &echo.
 echo			10. WIFI密码 &echo.
@@ -51,7 +51,8 @@ if "%c%"=="12" call :app_setting
 if "%c%"=="13" call :hosts_editor
 if "%c%"=="14" call :network_setting
 if "%c%"=="15" call :device_setting
-if "%c%"=="16" call :hahaha
+if "%c%"=="16" call :calculate_hash
+if "%c%"=="17" call :hahaha
 if "%c%"=="00" call :about_me
 if "%c%"=="0"  goto byebye
 if /i "%c%"=="q" goto byebye
@@ -1668,6 +1669,36 @@ goto :device_setting
 set "device=%~1" & set "%opt%=%~2"
 powershell.exe -nologo -noprofile -Command "$ProgressPreference = 'SilentlyContinue';Get-PnpDevice -Class %device% | %opt%-PnpDevice -Confirm:$false" >nul 2>&1
 exit /b
+
+:: 计算文件的hash值 
+:calculate_hash
+setlocal
+call :print_title "hash计算"
+set "c="
+call :print_separator
+echo				1. 文件hash计算 &echo.
+echo				0. 返回(q) &echo.
+call :print_separator
+set /p "c=请输入你的选择: "
+if "%c%"=="0" endlocal & exit /b
+if /i "%c%"=="q" endlocal & exit /b
+if /i "%c%"=="1" (
+	set "file_path="
+	set /p "file_path=请输入文件路径:" 
+	if not exist "!file_path!" (
+		call :wait_keydown "文件不存在: !file_path!"
+		endlocal & goto :calculate_hash
+	)
+	echo.
+	for %%a in (MD2 MD4 MD5 SHA1 SHA256 SHA384 SHA512) do (
+		for /f "tokens=1" %%b in ('certutil -hashfile "!file_path!" %%a ^| findstr /v /c:"CertUtil" /c:"%%a "') do (
+			echo %%a : %%b
+		)
+	)
+	echo.
+	call :wait_keydown
+)
+endlocal & goto :calculate_hash
 
 :: 图一乐 
 :hahaha
