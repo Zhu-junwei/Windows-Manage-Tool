@@ -7,8 +7,8 @@ shift && cd /d "%~dp0"
 :: 一些配置参数 
 set "color=0A"
 set "title=Windows管理小工具"
-set "updated=20250920"
-set "rversion=v2.1.7"
+set "updated=20251018"
+set "rversion=v2.1.8"
 set "cols=100"
 set "lines=40"
 set "separator=="
@@ -23,17 +23,17 @@ call :reset_color_size
 call :print_title "%title%"
 set "c="
 call :print_separator
-echo			1. 右键菜单设置                  11. 电源管理 &echo.
-echo			2. 桌面设置                      12. 应用管理 &echo.
-echo			3. 任务栏设置                    13. 编辑hosts &echo.
-echo			4. 资源管理器设置                14. 网络管理 &echo.
-echo			5. 下载 Windows ^& Office         15. 设备管理 &echo.
-echo			6. 激活 Windows ^& Office         16. hash计算 &echo.
-echo			7. Windows更新设置               17.图一乐 &echo.
-echo			8. UAC（用户账户控制）设置 &echo.
-echo			9. 上帝模式 &echo.
+echo			 1. 右键菜单设置                  11. 电源管理 &echo.
+echo			 2. 桌面设置                      12. 应用管理 &echo.
+echo			 3. 任务栏设置                    13. 编辑hosts &echo.
+echo			 4. 资源管理器设置                14. 网络管理 &echo.
+echo			 5. 下载 Windows ^& Office         15. 设备管理 &echo.
+echo			 6. 激活 Windows ^& Office         16. hash计算 &echo.
+echo			 7. Windows更新设置               17. 图一乐 &echo.
+echo			 8. UAC（用户账户控制）设置 &echo.
+echo			 9. 上帝模式 &echo.
 echo			10. WIFI密码 &echo.
-echo			0. 退出(q)                       00. 关于&echo.
+echo			 0. 退出(q)                       00. 关于&echo.
 call :print_separator
 set /p c=请输入你的选择: 
 if "%c%"=="1"  call :submenu_right_click
@@ -559,8 +559,8 @@ exit /b
 call :print_title "资源管理器设置"
 set "a=" 
 call :print_separator
-echo			 1. 默认打开[此电脑/主文件夹]         11. Windows 10此电脑文件夹设置 &echo.
-echo			 2. 文件扩展(后缀)名开关 &echo.
+echo			 1. 默认打开[此电脑/主文件夹]         11. 清理图标/缩略图缓存 &echo.
+echo			 2. 文件扩展(后缀)名开关              12. Windows 10此电脑文件夹设置 &echo.
 echo			 3. [单击/双击]打开文件 &echo.
 echo			 4. [显示/隐藏]复选框 &echo.
 echo			 5. [显示/隐藏]系统隐藏文件 &echo.
@@ -568,7 +568,7 @@ echo			 6. U盘禁用开关 &echo.
 echo			 7. 导航栏-主文件夹开关 &echo.
 echo			 8. 导航栏-图库开关 &echo.
 echo			 9. 导航栏-控制面板开关 &echo.
-echo			10. 清理图标/缩略图缓存 &echo.
+echo			10. 导航栏-重复驱动器开关 &echo.
 echo			 0. 返回(q) &echo.
 call :print_separator
 set /p "a=请输入你的选择:"
@@ -657,8 +657,17 @@ if "%a%"=="1" (
 		call :sleep "已隐藏控制面板" 6
 	)
 ) else if "%a%"=="10" (
+	choice /c 12 /n /m "重复驱动器? [1.删除 2.显示]: "
+	if errorlevel 2 (
+		reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\DelegateFolders\{F5FB2C77-0E2F-4A16-A381-3E560C68BC83}" /v "" /t REG_SZ /d "Removable Drives" /f
+		call :sleep "已显示重复驱动器" 6
+	) else (
+		reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\DelegateFolders\{F5FB2C77-0E2F-4A16-A381-3E560C68BC83}" /f
+		call :sleep "已删除重复驱动器" 6
+	)
+)  else if "%a%"=="11" (
 	call :clear_icon_cache
-) else if "%a%"=="11" (
+) else if "%a%"=="12" (
 	call :this_computer_folder
 )
 if "%a%"=="0" exit /b
@@ -698,6 +707,7 @@ regedit.exe /s "%GALLERY_TOGGLE_REG%"
 IF EXIST "%GALLERY_TOGGLE_REG%" DEL "%GALLERY_TOGGLE_REG%"
 call :sleep "已设置图库 %op_name% ，请重新打开资源管理器查看效果" 10
 exit /b
+
 
 :: 清理图标/缩略图缓存 
 :clear_icon_cache
