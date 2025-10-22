@@ -1,14 +1,13 @@
 @echo off & setlocal EnableDelayedExpansion & chcp 65001>nul
 
 :: 使用管理员权限 
-if "%1" neq "runas" mshta vbscript:CreateObject("Shell.Application").ShellExecute("conhost.exe","cmd.exe /c ""%~f0"" runas %*","","runas",1)(window.close)&&exit
-shift && cd /d "%~dp0"
+net session >nul 2>&1 || (powershell -NoP -C "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', '\"\"%~f0\" %*\"' -Verb RunAs" && exit)
 
 :: 一些配置参数 
 set "color=0A"
 set "title=Windows管理小工具"
-set "updated=20251018"
-set "rversion=v2.1.8"
+set "updated=20251022"
+set "rversion=v2.1.9"
 set "cols=100"
 set "lines=40"
 set "separator=="
