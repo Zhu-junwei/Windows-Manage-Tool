@@ -7,7 +7,7 @@ net session >nul 2>&1 || (powershell -NoP -C "Start-Process -FilePath 'cmd.exe' 
 set "color=0A"
 set "title=Windows管理小工具"
 set "updated=20251022"
-set "rversion=v2.1.9"
+set "rversion=v2.2.0"
 set "cols=100"
 set "lines=40"
 set "separator=="
@@ -867,7 +867,6 @@ set "a="
 call :print_separator
 echo			1. Microsoft Activation Scripts (MAS) &echo.
 echo			2. HEU_KMS_Activator &echo.
-echo			3. KMS_VL_ALL_AIO &echo.
 echo			0. 返回(q) &echo.
 call :print_separator
 echo.
@@ -876,8 +875,6 @@ if "%a%"=="1" (
 	start powershell -Command "irm https://get.activated.win | iex"
 ) else if "%a%"=="2" (
 	start "" https://github.com/zbezj/HEU_KMS_Activator/releases
-) else if "%a%"=="3" (
-	start "" https://github.com/abbodi1406/KMS_VL_ALL_AIO/releases
 )
 if "%a%"=="0" exit /b
 if /i "%a%"=="q" exit /b
