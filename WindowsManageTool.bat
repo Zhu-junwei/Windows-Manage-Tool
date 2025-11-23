@@ -6,7 +6,7 @@ net session >nul 2>&1 || (powershell -NoP -C "Start-Process -FilePath 'cmd.exe' 
 :: 一些配置参数 
 set "color=0A"
 set "title=Windows管理小工具"
-set "updated=20251022"
+set "updated=20251122"
 set "rversion=v2.2.0"
 set "cols=100"
 set "lines=40"
