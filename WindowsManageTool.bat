@@ -1,20 +1,29 @@
 @echo off & setlocal EnableDelayedExpansion & chcp 65001>nul
 
-:: 使用管理员权限 
+:: 使用管理员权限运行 
 net session >nul 2>&1 || (powershell -NoP -C "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', '\"\"%~f0\" %*\"' -Verb RunAs" && exit)
 
 :: 一些配置参数 
+call :init_parameters
+:: 接收传参来直接调用特定的子程序
+if "%~1" neq "" (call :%~1) else (call :main_menu) & exit /b
+
+:: 初始化配置参数 
+:init_parameters
 set "color=0A"
 set "title=Windows管理小工具"
-set "updated=20251122"
-set "rversion=v2.2.0"
+set "updated=20251225"
+set "rversion=v2.2.1"
 set "cols=100"
 set "lines=40"
 set "separator=="
-title %title% %rversion% 
+:: 存放设置 
+set "CONF_DIR=%APPDATA%\WindowsManageTool"
+set "CONF_FILE=%CONF_DIR%\config.cmd"
+call :load_config
 call :reset_color_size
-:: 接收传参来直接调用特定的子程序
-if not "%~1"=="" (call :%~1 & exit)
+title %title% %rversion%
+exit /b
 
 :: 主菜单 
 :main_menu 
@@ -32,9 +41,11 @@ echo			 7. Windows更新设置               17. 图一乐 &echo.
 echo			 8. UAC（用户账户控制）设置 &echo.
 echo			 9. 上帝模式 &echo.
 echo			10. WIFI密码 &echo.
-echo			 0. 退出(q)                       00. 关于&echo.
+echo			 0. 退出(q)                       00. 程序设置&echo.
 call :print_separator
 set /p c=请输入你的选择: 
+if "%c%"=="0"  goto byebye
+if /i "%c%"=="q" goto byebye
 if "%c%"=="1"  call :submenu_right_click
 if "%c%"=="2"  call :desktop
 if "%c%"=="3"  call :taskbar
@@ -52,9 +63,7 @@ if "%c%"=="14" call :network_setting
 if "%c%"=="15" call :device_setting
 if "%c%"=="16" call :calculate_hash
 if "%c%"=="17" call :hahaha
-if "%c%"=="00" call :about_me
-if "%c%"=="0"  goto byebye
-if /i "%c%"=="q" goto byebye
+if "%c%"=="00" call :bat_settings
 goto main_menu 
 
 :: 右键菜单设置子菜单 
@@ -263,17 +272,17 @@ goto submenu_right_click
 call :print_title "桌面设置" 
 set "a="
 call :print_separator
-echo				1. 隐藏桌面图标小箭头 & echo.
-echo				2. 显示桌面图标小箭头 & echo.
-echo				3. 隐藏了解此图片（windows聚焦） & echo.
-echo				4. 显示了解此图片（windows聚焦） & echo.
-echo				5. 打开桌面图标设置 & echo.
-echo				6. 添加网络连接 & echo.
-echo				7. 添加IE快捷方式& echo.
-echo				8. 显示windows版本水印 & echo.
-echo				9. 隐藏windows版本水印& echo.
-echo				10. 设置Bing每日桌面背景& echo.
-echo				0. 返回(q) & echo.
+echo			 1. 隐藏桌面图标小箭头                    11. 提取桌面壁纸& echo.
+echo			 2. 显示桌面图标小箭头 & echo.
+echo			 3. 隐藏了解此图片（windows聚焦） & echo.
+echo			 4. 显示了解此图片（windows聚焦） & echo.
+echo			 5. 打开桌面图标设置 & echo.
+echo			 6. 添加网络连接 & echo.
+echo			 7. 添加IE快捷方式& echo.
+echo			 8. 显示windows版本水印 & echo.
+echo			 9. 隐藏windows版本水印& echo.
+echo			10. 设置Bing每日桌面背景& echo.
+echo			 0. 返回(q) & echo.
 call :print_separator
 set /p a=请输入你的选择: 
 if "%a%"=="1" (
@@ -321,6 +330,8 @@ if "%a%"=="1" (
 )else if "%a%"=="10" (
 	call :set_desktop_background
 	call :sleep "10秒后自动返回..." 10
+)else if "%a%"=="11" (
+	call :GetDesktopWallpaper
 )
 if "%a%"=="0" exit /b
 if /i "%a%"=="q" exit /b
@@ -328,7 +339,12 @@ goto desktop
 
 :: 桌面添加网络连接
 :desktop_add_network
-mshta VBScript:Execute("Set ws=CreateObject(""WScript.Shell""):Set lnk=ws.CreateShortcut(ws.SpecialFolders(""Desktop"") & ""\网络连接.lnk""):lnk.TargetPath=""shell:::{7007ACC7-3202-11D1-AAD2-00805FC1270E}"":lnk.Save:close")
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+"$ws = New-Object -ComObject WScript.Shell; ^
+$desktop = [Environment]::GetFolderPath('Desktop'); ^
+$lnk = $ws.CreateShortcut(\"$desktop\网络连接.lnk\"); ^
+$lnk.TargetPath = 'shell:::{7007ACC7-3202-11D1-AAD2-00805FC1270E}'; ^
+$lnk.Save()"
 exit /b
 
 :: 桌面添加IE快捷方式
@@ -386,6 +402,34 @@ if exist "!imageFile!" (
     echo 未能下载或找到图片文件 
 )
 endlocal & exit /b
+
+:: 提取桌面壁纸
+:GetDesktopWallpaper
+setlocal enabledelayedexpansion
+set "DESKTOP=%USERPROFILE%\Desktop"
+set "OUT=%DESKTOP%\DesktopWallpaper.jpg"
+set "RESULT=1"
+set "MSG=未找到桌面壁纸"
+:: 尝试从注册表获取
+call :read_reg_value "HKCU\Control Panel\Desktop" "WallPaper"
+if defined ret_value if exist "%ret_value%" (
+    copy /y "%ret_value%" "%OUT%" >nul
+    set "RESULT=0"
+)
+:: fallback：使用系统缓存
+if %RESULT% neq 0 (
+    set "CACHE=%APPDATA%\Microsoft\Windows\Themes\TranscodedWallpaper"
+    if exist "%CACHE%" (
+        copy /y "%CACHE%" "%OUT%" >nul
+        set "RESULT=0"
+    )
+)
+:: 统一出口
+if %RESULT% equ 0 (
+    set "MSG=壁纸已提取到桌面"
+)
+call :sleep "%MSG%" 4
+endlocal & exit /b %RESULT%
 
 :: 任务栏设置 
 :taskbar 
@@ -1785,6 +1829,109 @@ if "%c%"=="0" endlocal & exit /b
 if /i "%c%"=="q" endlocal & exit /b
 goto :hahaha
 
+:: 程序设置 
+:bat_settings
+call :print_title "程序设置"
+set "c="
+call :print_separator
+echo					1. 更换主题 &echo.
+echo					2. 检查更新 &echo.
+echo					3. 关于 &echo.
+echo					0. 返回(q) &echo.
+call :print_separator
+set /p "c=请输入你的选择: "
+if "%c%"=="0"  exit /b
+if /i "%c%"=="q" exit /b
+if /i "%c%"=="1" (
+	call :theme_settings
+)else if "%c%"=="2" (
+	call :update_script
+)else if "%c%"=="3" (
+	call :about_me
+)
+goto :bat_settings
+
+:: 更换主题 
+:theme_settings
+call :print_title "更换主题"
+set "c="
+call :print_separator
+echo    极客黑		    护眼绿 		    樱桃红 		    幽兰紫 
+echo		A1. 黑绿-02 		 C1. 绿黑-20		D1. 红白-47  		F1. 紫黄-56
+echo		A2. 黑浅绿-03		 C2. 绿白-27		D2. 红淡黄-4E		F2. 紫淡绿-5A
+echo		A3. 黑淡绿-0A		 C3. 绿淡浅绿-2B	D3. 红亮白-4F		F3. 紫淡浅绿-5B
+echo		A4. 黑淡黄-0E		 C4. 绿淡黄-2E		D4. 淡红黑-C0		F4. 淡紫黄-D6
+echo		A5. 黑亮白-0F		 C5. 绿亮白-2F		D5. 淡红白-C7		F5. 淡紫白-D7
+echo    天空蓝  			 C6. 淡绿黑-A0		D6. 淡红淡黄-CE		F6. 淡紫淡浅绿-DB
+echo		B1. 蓝黄-16  		 C7. 淡绿淡黄-AE    月光白 			F7. 淡紫淡黄-DE
+echo		B2. 蓝淡浅绿-1B		 C8. 浅绿黑-30		E1. 亮白黑-F0		F8. 淡紫亮白-DF
+echo		B3. 淡蓝白-97		 C9. 浅绿白-37		E2. 亮白蓝-F1
+echo		B4. 淡蓝淡黄-9E		 C10.浅绿淡黄-3E	E3. 亮白红-F4		00. 重置 黑淡绿-0A
+echo		B5. 淡蓝亮白-9F		 C11.淡浅绿蓝-B1	E4. 白黑-70
+echo.
+echo		0. 返回(q) &echo.
+call :print_separator
+set /p "c=请输入你的选择: "
+if "%c%"=="0" exit /b
+if /i "%c%"=="q" exit /b
+for %%A in ("%c%") do set "SEL=%%~A"
+set "SEL=%SEL:a=A%"
+set "SEL=%SEL:b=B%"
+set "SEL=%SEL:c=C%"
+set "SEL=%SEL:d=D%"
+set "SEL=%SEL:e=E%"
+set "SEL=%SEL:f=F%"
+set "cc="
+if "%SEL%"=="A1" set "cc=02"
+if "%SEL%"=="A2" set "cc=03"
+if "%SEL%"=="A3" set "cc=0A"
+if "%SEL%"=="A4" set "cc=0E"
+if "%SEL%"=="A5" set "cc=0F"
+if "%SEL%"=="B1" set "cc=16"
+if "%SEL%"=="B2" set "cc=1B"
+if "%SEL%"=="B3" set "cc=97"
+if "%SEL%"=="B4" set "cc=9E"
+if "%SEL%"=="B5" set "cc=9F"
+if "%SEL%"=="C1"  set "cc=20"
+if "%SEL%"=="C2"  set "cc=27"
+if "%SEL%"=="C3"  set "cc=2B"
+if "%SEL%"=="C4"  set "cc=2E"
+if "%SEL%"=="C5"  set "cc=2F"
+if "%SEL%"=="C6"  set "cc=A0"
+if "%SEL%"=="C7"  set "cc=AE"
+if "%SEL%"=="C8"  set "cc=30"
+if "%SEL%"=="C9"  set "cc=37"
+if "%SEL%"=="C10" set "cc=3E"
+if "%SEL%"=="C11" set "cc=B1"
+if "%SEL%"=="D1" set "cc=47"
+if "%SEL%"=="D2" set "cc=4E"
+if "%SEL%"=="D3" set "cc=4F"
+if "%SEL%"=="D4" set "cc=C0"
+if "%SEL%"=="D5" set "cc=C7"
+if "%SEL%"=="D6" set "cc=CE"
+if "%SEL%"=="E1" set "cc=F0"
+if "%SEL%"=="E2" set "cc=F1"
+if "%SEL%"=="E3" set "cc=F4"
+if "%SEL%"=="E4" set "cc=70"
+if "%SEL%"=="F1" set "cc=56"
+if "%SEL%"=="F2" set "cc=5A"
+if "%SEL%"=="F3" set "cc=5B"
+if "%SEL%"=="F4" set "cc=D6"
+if "%SEL%"=="F5" set "cc=D7"
+if "%SEL%"=="F6" set "cc=DB"
+if "%SEL%"=="F7" set "cc=DE"
+if "%SEL%"=="F8" set "cc=DF"
+if "%SEL%"=="00" (
+    call :clean_config
+)
+if defined cc (
+	set "color=%cc%"
+	call :reset_color
+	call :save_config
+	goto :theme_settings
+)
+goto :theme_settings
+
 :: 检查脚本更新 
 :update_script
 call :print_title "检查更新"
@@ -1851,7 +1998,7 @@ echo    小工具，集成了多个系统设置，旨在简化日常维护和系
 echo. 
 echo  当前版本：
 echo. 
-echo     %rversion% 
+echo     %rversion% 圣诞版 
 echo. 
 echo  更新地址： 
 echo. 
@@ -1864,11 +2011,8 @@ echo.
 echo      博客园 批处理之家 吾爱破解 致美化 GitHub 蓝奏云 ChatGPT DeepSeek 
 echo.
 call :print_separator
-echo			0. 返回(q)		1. 检查更新 &echo.
-call :print_separator
-set "a="
-set /p "a=请输入你的选择: "
-if "%a%"=="1" call :update_script & goto :about_me
+echo.
+call :wait_keydown
 exit /b
 
 :: 分割线
@@ -1954,6 +2098,29 @@ exit /b
 :: 重启系统 
 :restart_system
 shutdown /r /t 0 & exit /b
+
+:: 加载自定义的设置 
+:load_config
+if exist "%CONF_FILE%" (
+    call "%CONF_FILE%"
+)
+exit /b
+
+:: 保存自定义的设置 
+:save_config
+if not exist "%CONF_DIR%" mkdir "%CONF_DIR%"
+(
+echo set "color=%color%"
+) > "%CONF_FILE%"
+exit /b
+
+:: 清空自定义的设置 
+:clean_config
+if exist "%CONF_DIR%" (
+	rmdir /s /q "%CONF_DIR%"
+)
+call :init_parameters
+exit /b
 
 :: 设置颜色和窗口大小 
 :reset_color_size
